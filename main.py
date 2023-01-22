@@ -76,6 +76,7 @@ def getHosts(awards_ceremony_name, tweets):
 
 def main():
     tweets = u.getTweets("gg2013.json")
+    awardAnswers, nomineeAnswers = u.getAnswers('2013')
     
     return 0
 
