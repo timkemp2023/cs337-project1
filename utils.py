@@ -15,3 +15,22 @@ def getTweets (file_name):
     file = open(file_name)
     tweets = json.load(file)
     return getTweetsTexts(tweets)
+
+
+def getAnswers(year):
+    awardsToNominees = {}
+    awardsList = []
+
+    file_name = "gg" + str(year) + "answers.json"
+    file = open(file_name)
+    answers = json.load(file)
+    awardAnswers = answers['award_data']
+
+    for award in awardAnswers:
+        awardsList.append(award)
+        awardsToNominees[award] = awardAnswers[award]['nominees']
+
+    return awardsList, awardsToNominees
+
+    
+
