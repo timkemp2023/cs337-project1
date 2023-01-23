@@ -10,30 +10,35 @@ winnerToAwardMap = {}
 # map award to winners
 awardToWinner = {}
 
-def getWinner(tweets, pattern, award_name):
+def getWinner(tweets, pattern, award_name, nominees_list):
     """
         get winner of an award from the list of nominees of that award using the awardToNomineesMap
     """
-    nominees = awardToNomineesMap[award_name]
-    voting = {nominee : 0 for nominee in nominees}
+    voting = {nominee : 0 for nominee in nominees_list}
     for tweet in tweets:
         matches =  pattern.match(tweet)
 
-        if matches and matches.group(1) in nominees and award_name in matches.group(3):
+        if matches and matches.group(1) in nominees_list and award_name in matches.group(3):
             winner = matches.group(1)
+            print(winner)
             voting[winner] += 1
 
-    voted_winner = max(voting, key=voting.get)
+    if voting:
+        voted_winner = max(voting, key=voting.get)
+    else:
+        voted_winner = "NO NOMINEES?"
+
     return voted_winner
 
-def getWinners(tweets, awards_list):
+def getWinners(tweets, awards_list, nominees_list):
     """
         aggregate the winners from each award name 
         
     """
     pattern = re.compile(r"(.*)(won|wins)(.*)?")
     for award in awards_list:
-        awardToWinner[award] = getWinner(tweets, pattern, award)
+        nominees = nominees_list[award]
+        awardToWinner[award] = getWinner(tweets, pattern, award, nominees)
 
 
 def getAwardNominees(award_name):
@@ -70,15 +75,12 @@ def getHosts(awards_ceremony_name, tweets):
     return voted_host
 
 
-
-
-
-
 def main():
     tweets = u.getTweets("gg2013.json")
     awardAnswers, nomineeAnswers = u.getAnswers('2013')
-    
-    return 0
+
+    getWinners(tweets, awardAnswers, nomineeAnswers)
+    #print(awardToWinner)
 
 if __name__ == "__main__":
     main()

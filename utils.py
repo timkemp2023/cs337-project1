@@ -28,9 +28,15 @@ def getAnswers(year):
 
     for award in awardAnswers:
         awardsList.append(award)
-        awardsToNominees[award] = awardAnswers[award]['nominees']
+        nominees = awardAnswers[award]['nominees']
+        nominees.append(awardAnswers[award]['winner'])
+        awardsToNominees[award] = nominees
 
     return awardsList, awardsToNominees
+
+
+#def extract_entities(text):
+
 
     
 
