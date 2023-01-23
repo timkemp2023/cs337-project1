@@ -35,7 +35,17 @@ def getAnswers(year):
     return awardsList, awardsToNominees
 
 
-#def extract_entities(text):
+def contains_award_name(match, award_name):
+    counter = 0
+    award_name_set = award_name.split(" ")
+    for word in set(award_name_set):
+        if word in match:
+            counter +=1
+
+    if counter >= 1:
+        return True
+    else:
+        return False
 
 
     

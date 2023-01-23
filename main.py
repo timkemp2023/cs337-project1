@@ -1,4 +1,4 @@
-import utils as u
+from utils import *
 import re
 
 # awardToNomineesMap maps award_name to a list of nominees for that award
@@ -18,27 +18,28 @@ def getWinner(tweets, pattern, award_name, nominees_list):
     for tweet in tweets:
         matches =  pattern.match(tweet)
 
-        if matches and matches.group(1) in nominees_list and award_name in matches.group(3):
-            winner = matches.group(1)
-            print(winner)
-            voting[winner] += 1
+        if matches and matches.group(1) and matches.group(1).strip() in nominees_list:
+            if matches.group(3) and contains_award_name(matches.group(3), award_name):
+                winner = matches.group(1).strip()
+                voting[winner] += 1
 
     if voting:
         voted_winner = max(voting, key=voting.get)
     else:
         voted_winner = "NO NOMINEES?"
 
+    #print(voting)
     return voted_winner
 
-def getWinners(tweets, awards_list, nominees_list):
+def getWinners(tweets, awards_list, nominees_lists):
     """
         aggregate the winners from each award name 
         
     """
-    pattern = re.compile(r"(.*)(won|wins)(.*)?")
+    pattern = re.compile(r"(.*)(won\s|wins\s)(.*)?")
     for award in awards_list:
-        nominees = nominees_list[award]
-        awardToWinner[award] = getWinner(tweets, pattern, award, nominees)
+        nominee_list = nominees_lists[award]
+        awardToWinner[award] = getWinner(tweets, pattern, award, nominee_list)
 
 
 def getAwardNominees(award_name):
@@ -65,7 +66,7 @@ def getHosts(awards_ceremony_name, tweets):
         matches =  pattern.match(tweet)
 
         if matches and matches.group(1):
-            host = matches.group(1)
+            host = matches.group(1).strip()
             if host in voting:
                 voting[host] += 1
             else:
@@ -76,11 +77,12 @@ def getHosts(awards_ceremony_name, tweets):
 
 
 def main():
-    tweets = u.getTweets("gg2013.json")
-    awardAnswers, nomineeAnswers = u.getAnswers('2013')
+    tweets = getTweets("gg2013.json")
+    awardAnswers, nomineeAnswers = getAnswers('2013')
 
     getWinners(tweets, awardAnswers, nomineeAnswers)
-    #print(awardToWinner)
+    print(awardToWinner)
+
 
 if __name__ == "__main__":
     main()
