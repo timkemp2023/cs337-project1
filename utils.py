@@ -1,6 +1,7 @@
 import json
-# from nltk.corpus import stopwords
+from nltk.corpus import stopwords
 import spacy
+
 nlp = spacy.load("en_core_web_sm")
 
 def getTweetsTexts(tweets, lower_case=True):
@@ -42,27 +43,18 @@ def getAnswers(year):
     return awardsList, awardsToNominees
 
 
-# def contains_award_name(match, award_name):
-#     counter = 0
-#     #award_name_set = award_name.split(" ")
+def contains_award_name(match, award_name):
+    counter = 0
+    #award_name_set = award_name.split(" ")
     
-#     #trying the set method because it is O(n+m), while this current method is O(m^2)
-#     award_name_set = frozenset([word for word in award_name.split(" ") if word not in stopwords.words("english")])
-#     match_set = frozenset([word for word in match.split(" ") if word not in stopwords.words("english")])
+    #trying the set method because it is O(n+m), while this current method is O(m^2)
+    award_name_set = frozenset([word for word in award_name.split(" ") if word not in stopwords.words("english")])
+    match_set = frozenset([word for word in match.split(" ") if word not in stopwords.words("english")])
 
-#     #removes stop words and returns true if the overlap in words is 3 or more.
-#     return len(award_name_set&match_set) >= 3
-    """
-    for word in set(award_name_set):
-        if word in match:
-            counter +=1
+    #removes stop words and returns true if the overlap in words is 3 or more.
+    return len(award_name_set&match_set) >= 3
 
-    if counter >= 1:
-        return True
-    else:
-        return False
-    """
-    
+
 def get_named_entities(text):
     named_entities = []
     doc = nlp(text)

@@ -11,6 +11,18 @@ winnerToAwardMap = {}
 awardToWinner = {}
 
 
+# compiles the winners of all awards
+def getWinners(tweets, awards_list, nominees_lists):
+    """
+        aggregate the winners from each award name 
+        
+    """
+    pattern = re.compile(r"(.*)(won\s|wins\s)(.*)?")
+    for award in awards_list:
+        nominee_list = nominees_lists[award]
+        awardToWinner[award] = getWinner(tweets, pattern, award, nominee_list)
+
+
 # gets the winner of given award out of all nominees for that award
 def getWinner(tweets, pattern, award_name, nominees_list):
     """
@@ -29,24 +41,33 @@ def getWinner(tweets, pattern, award_name, nominees_list):
     return voted_winner
 
 
-# compiles the winners of all awards
-def getWinners(tweets, awards_list, nominees_lists):
-    """
-        aggregate the winners from each award name 
-        
-    """
-    pattern = re.compile(r"(.*)(won\s|wins\s)(.*)?")
-    for award in awards_list:
-        nominee_list = nominees_lists[award]
-        awardToWinner[award] = getWinner(tweets, pattern, award, nominee_list)
-
-
 # gets the list of nominees given a single award
-def getAwardNominees(award_name):
+def getNominees(tweets, awards_list):
     """
         gets all the nominees of a given an award names
     """
-    return ""
+    pattern = re.compile(r"(.*)(is nominated\s|are nominated\s|have been nominated\s|was nominated\s)(.*)?")
+    for award in awards_list:
+        awardToNomineesMap[award] = getNominee(tweets, pattern, award)
+    
+
+def getNominee(tweets, pattern, award):
+    voting = {}
+    for tweet in tweets:
+        matches =  pattern.match(tweet)
+
+        if matches and matches.group(1):
+            nominee_text = matches.group(1).strip()
+            possible_nominees = get_named_entities(nominee_text)
+
+            for nominee in possible_nominees:
+                if nominee in voting:
+                    voting[nominee] += 1
+                else:
+                    voting[nominee] = 1
+
+    voted_nominee = max(voting, key=voting.get)
+    return voted_nominee
 
 
 def getAwardCategories(tweets):
@@ -94,6 +115,7 @@ def getHosts(awards_ceremony_name, tweets):
                 else:
                     voting[host] = 1
 
+    print("Host Viting")
     print(voting)
     voted_host = max(voting, key=voting.get)
     return voted_host
@@ -105,12 +127,16 @@ def main():
     awardAnswers, nomineeAnswers = getAnswers('2013')
 
     getWinners(lower_case_tweets, awardAnswers, nomineeAnswers)
-    host = getHosts("gg", tweets)
-    #print(host)
     print(awardToWinner)
-    tweets = getTweets("gg2013.json")
-    # awardAnswers, nomineeAnswers = getAnswers('2013')
-    print(getAwardCategories(tweets))
+
+    # getNominees(tweets, awardAnswers)
+    # print(awardToNomineesMap)
+
+    host = getHosts("gg", tweets)
+    print(host)
+
+    #awardAnswers, nomineeAnswers = getAnswers('2013')
+    #print(getAwardCategories(tweets))
 
 
 if __name__ == "__main__":
