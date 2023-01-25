@@ -21,7 +21,7 @@ def getWinner(tweets, pattern, award_name, nominees_list):
         matches =  pattern.match(tweet)
 
         if matches and matches.group(1) and matches.group(1).strip() in nominees_list:
-            if matches.group(3) and contains_award_name(matches.group(3), award_name):
+            # if matches.group(3) and contains_award_name(matches.group(3), award_name):
                 winner = matches.group(1).strip()
                 voting[winner] += 1
 
@@ -49,11 +49,28 @@ def getAwardNominees(award_name):
     return ""
 
 
-def getAwardCategories(awards_ceremony_name, tweets):
+def getAwardCategories(tweets):
     """
-        gets all the award categories from given tweets and given the name of awards ceremony
+        gets all the award categories from given tweets
     """
-    return ""
+    pattern = re.compile(r"best(.*)")
+    for tweet in tweets:
+        taggedTweet = list(nlp(tweet))
+        textBeforeVerb = ""
+        textAfterVerb = ""
+        for token in taggedTweet:
+            if token.pos != "VERB":
+                textBeforeVerb += token.text + " "
+        for token in taggedTweet[::-1]:
+            if token.pos != "VERB":
+                textAfterVerb += token.text + " "
+        matches1 = pattern.match(textBeforeVerb)
+        matches2 = pattern.match(textAfterVerb)
+        if matches1:
+            print("match 1, ", matches1, "\n\n")
+        if matches2:
+            print("match 2, ", matches2, "\n\n")
+    # return matches1, matches2
 
 
 # gets all the hosts of the award show
@@ -91,6 +108,9 @@ def main():
     host = getHosts("gg", tweets)
     #print(host)
     print(awardToWinner)
+    tweets = getTweets("gg2013.json")
+    # awardAnswers, nomineeAnswers = getAnswers('2013')
+    print(getAwardCategories(tweets))
 
 
 if __name__ == "__main__":
