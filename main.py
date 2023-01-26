@@ -17,7 +17,7 @@ def getWinners(tweets, awards_list, nominees_lists):
         aggregate the winners from each award name 
         
     """
-    pattern = re.compile(r"(.*)(won\s|wins\s)(.*)?")
+    pattern = re.compile(r"(.*)(won\s|wins\s|receive\s|get\s|got(.*)?")
     for award in awards_list:
         nominee_list = nominees_lists[award]
         awardToWinner[award] = getWinner(tweets, pattern, award, nominee_list)
@@ -46,7 +46,7 @@ def getNominees(tweets, awards_list):
     """
         gets all the nominees of a given an award names
     """
-    pattern = re.compile(r"(.*)(is nominated\s|are nominated\s|have been nominated\s|was nominated\s)(.*)?")
+    pattern = re.compile(r"(.*)(nominee\s|is nominated\s|are nominated\s|have been nominated\s|was nominated\s)(.*)?")
     for award in awards_list:
         awardToNomineesMap[award] = getNominee(tweets, pattern, award)
     
@@ -59,7 +59,8 @@ def getNominee(tweets, pattern, award):
         if matches and matches.group(1):
             nominee_text = matches.group(1).strip()
             possible_nominees = get_named_entities(nominee_text)
-
+            #print("possible eintities: ")
+            #print(possible_nominees)
             for nominee in possible_nominees:
                 if nominee in voting:
                     voting[nominee] += 1
@@ -126,11 +127,11 @@ def main():
     tweets = getTweets("gg2013.json", False)
     awardAnswers, nomineeAnswers = getAnswers('2013')
 
-    getWinners(lower_case_tweets, awardAnswers, nomineeAnswers)
-    print(awardToWinner)
+    # getWinners(lower_case_tweets, awardAnswers, nomineeAnswers)
+    # print(awardToWinner)
 
-    # getNominees(tweets, awardAnswers)
-    # print(awardToNomineesMap)
+    getNominees(tweets, awardAnswers)
+    print(awardToNomineesMap)
 
     host = getHosts("gg", tweets)
     print(host)

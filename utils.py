@@ -62,6 +62,9 @@ def get_named_entities(text):
     for entity in doc.ents:
         if entity.label_ == "PERSON":
             named_entities.append(entity.text)
+        else:
+            if '@' not in entity.text:
+                print(entity.label_, ": ", entity.text)
 
     return named_entities
 
