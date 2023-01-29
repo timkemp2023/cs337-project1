@@ -1,5 +1,7 @@
 from utils import *
 import re
+import imdb
+ia = imdb.Cinemagoer()
 from spacy.lang.en.stop_words import STOP_WORDS
 
 # awardToNomineesMap maps award_name to a list of nominees for that award
@@ -58,15 +60,26 @@ def getNominee(tweets, pattern, award):
         matches =  pattern.match(tweet)
 
         if matches and matches.group(1):
-            nominee_text = matches.group(1).strip()
-            possible_nominees = get_named_entities(nominee_text)
-            #print("possible eintities: ")
-            #print(possible_nominees)
-            for nominee in possible_nominees:
-                if nominee in voting:
-                    voting[nominee] += 1
+            awardSet = frozenset(award)
+            possibleTextSet = frozenset(matches.group(3).strip())
+            if len(awardSet&possibleTextSet) >= 3:
+                # print(tweet, "\n")
+                if 'actor' or 'actress' or 'director' in awardSet:
+                    nominee_text = matches.group(1).strip()
+                    # print("nominee: ", nominee_text)
+                    # print("word? ", matches.group(2).strip())
+                    # print("category: ", matches.group(3).strip())
+                    possible_nominees = get_named_entities(nominee_text)
+                    #print("possible eintities: ")
+                    #print(possible_nominees)
+                    for nominee in possible_nominees:
+                        if nominee in voting:
+                            voting[nominee] += 1
+                        else:
+                            voting[nominee] = 1
+                #stuff for getting movies? thining of imdb library
                 else:
-                    voting[nominee] = 1
+                    pass
 
     voted_nominee = max(voting, key=voting.get)
     return voted_nominee
@@ -98,15 +111,15 @@ def getAwardCategories(tweets):
         
         matches1 = pattern.match(textBeforeVerb)
         matches2 = pattern.match(textAfterVerb)
-        if matches2:
-            print("Text After is ", textAfterVerb, "\n")
-            print("tweet is ", tweet, "\n")
-            print("match is ", matches2, "\n\n")
+        # if matches2:
+        #     print("Text After is ", textAfterVerb, "\n")
+        #     print("tweet is ", tweet, "\n")
+        #     print("match is ", matches2, "\n\n")
         
-        if matches1:
-            print("Text Before is ", textBeforeVerb, "\n")
-            print("tweet is ", tweet, "\n ")
-            print("match is ", matches1, "\n\n")
+        # if matches1:
+        #     print("Text Before is ", textBeforeVerb, "\n")
+        #     print("tweet is ", tweet, "\n ")
+        #     print("match is ", matches1, "\n\n")
         match = None
         if matches1:
             match = matches1
@@ -151,14 +164,14 @@ def getHosts(awards_ceremony_name, tweets):
 def main():
     lower_case_tweets = getTweets("gg2013.json")
     # scrapeOfficialAwardsList()
-    # tweets = getTweets("gg2013.json", False)
+    tweets = getTweets("gg2013.json", False)
     awardAnswers, nomineeAnswers = getAnswers('2013')
 
     # getWinners(lower_case_tweets, awardAnswers, nomineeAnswers)
     # print(awardToWinner)
 
-    # getNominees(tweets, awardAnswers)
-    # print(awardToNomineesMap)
+    getNominees(tweets, awardAnswers)
+    print(awardToNomineesMap)
 
     # host = getHosts("gg", tweets)
     # print(host)
