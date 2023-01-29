@@ -2,8 +2,10 @@ import json
 from nltk.corpus import stopwords
 import spacy
 import re
+from spacy.lang.en import English
+import wikipediaapi
 
-nlp = spacy.load("en_core_web_sm")
+nlp = English()
 
 def getTweetsTexts(tweets, lower_case=True):
     """
@@ -79,3 +81,21 @@ def get_possible_nominees(text):
 #     text = "Leo Dicaprio and Les Miserables, and even #ARGO have been nominated for golden globe"
 #     print(get_possible_nominees(text))
 
+def scrapeOfficialAwardsList():
+    # used as a benchmark to gather all awards there is avaliable and vote on them based on tweets match to collect the ones seen from 
+    # the tweets
+    wiki_wiki = wikipediaapi.Wikipedia('en')
+    page_py = wiki_wiki.page("Golden_Globe_Awards")
+    awardCategoriesWikipedia = page_py.section_by_title("Categories")
+    motionPictureAwards = awardCategoriesWikipedia.section_by_title("Motion picture awards")
+    televisionAwards = awardCategoriesWikipedia.section_by_title("Television awards")
+    motionPictureAwardsList = motionPictureAwards.text.split("\n")
+    televisionAwardsList = televisionAwards.text.split("\n")
+    awardsList = {}
+    for awardName in motionPictureAwardsList:
+        awardsList[awardName.split(":")[0].strip()] = 0
+    
+    for awardName in televisionAwardsList:
+        awardsList[awardName.split(":")[0].strip()] = 0
+    
+    return awardsList

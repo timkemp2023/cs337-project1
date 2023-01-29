@@ -1,5 +1,8 @@
 from utils import *
 import re
+import imdb
+ia = imdb.Cinemagoer()
+from spacy.lang.en.stop_words import STOP_WORDS
 
 # awardToNomineesMap maps award_name to a list of nominees for that award
 awardToNomineesMap = {}
@@ -79,23 +82,48 @@ def getAwardCategories(tweets):
         gets all the award categories from given tweets
     """
     pattern = re.compile(r"best(.*)")
+    officialAwards = scrapeOfficialAwardsList()
     for tweet in tweets:
-        taggedTweet = list(nlp(tweet))
+        
+        my_doc = nlp(tweet)
+        taggedTweet = []
+        for token in my_doc:
+            taggedTweet.append(token)
         textBeforeVerb = ""
         textAfterVerb = ""
         for token in taggedTweet:
-            if token.pos != "VERB":
-                textBeforeVerb += token.text + " "
+            lexeme = nlp.vocab[token.text]
+            if token.pos != "VERB" and lexeme.is_stop == False:
+                textBeforeVerb += token.text
         for token in taggedTweet[::-1]:
-            if token.pos != "VERB":
-                textAfterVerb += token.text + " "
+            lexeme = nlp.vocab[token.text]
+            if token.pos != "VERB" and lexeme.is_stop == False:
+                textAfterVerb += token.text + "  "
+
+        
         matches1 = pattern.match(textBeforeVerb)
         matches2 = pattern.match(textAfterVerb)
+        # if matches2:
+        #     print("Text After is ", textAfterVerb, "\n")
+        #     print("tweet is ", tweet, "\n")
+        #     print("match is ", matches2, "\n\n")
+        
+        # if matches1:
+        #     print("Text Before is ", textBeforeVerb, "\n")
+        #     print("tweet is ", tweet, "\n ")
+        #     print("match is ", matches1, "\n\n")
+        match = None
         if matches1:
-            print("match 1, ", matches1, "\n\n")
+            match = matches1
         if matches2:
-            print("match 2, ", matches2, "\n\n")
-    # return matches1, matches2
+            match = matches2
+        # for officialName, count in officialAwards.items():
+        #     matches1FrozenSet = frozenset([word for word in matches2.group(0).split(" ")])
+        #     tweetFrozenSet = frozenset(officialName.split(" "))
+        #     if len(matches1FrozenSet&tweetFrozenSet) >= 2:
+        #         count += 1
+        # print("Map is ", officialAwards, "\n\n")
+    
 
 
 # gets all the hosts of the award show
@@ -127,6 +155,7 @@ def getHosts(awards_ceremony_name, tweets):
 
 def main():
     lower_case_tweets = getTweets("gg2013.json")
+    # scrapeOfficialAwardsList()
     tweets = getTweets("gg2013.json", False)
     awardAnswers, nomineeAnswers = getAnswers('2013')
 
@@ -144,8 +173,8 @@ def main():
     #print(host)
 
     #awardAnswers, nomineeAnswers = getAnswers('2013')
-    #print(getAwardCategories(tweets))
-
+    print(getAwardCategories(lower_case_tweets))
+    
 
 if __name__ == "__main__":
     main()
