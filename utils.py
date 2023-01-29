@@ -1,6 +1,7 @@
 import json
 from nltk.corpus import stopwords
 import spacy
+import re
 
 nlp = spacy.load("en_core_web_sm")
 
@@ -62,9 +63,19 @@ def get_named_entities(text):
     for entity in doc.ents:
         if entity.label_ == "PERSON":
             named_entities.append(entity.text)
-        else:
-            if '@' not in entity.text:
-                print(entity.label_, ": ", entity.text)
+        # else:
+        #     if '@' not in entity.text:
+        #         print(entity.label_, ": ", entity.text)
 
     return named_entities
+
+def get_possible_nominees(text):
+    pattern = re.compile(r"(?:[A-Z][A-Za-z]*\s)+")
+    matches = pattern.findall(text)
+    return matches
+
+
+# if __name__ == "__main__":
+#     text = "Leo Dicaprio and Les Miserables, and even #ARGO have been nominated for golden globe"
+#     print(get_possible_nominees(text))
 

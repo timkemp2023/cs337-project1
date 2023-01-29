@@ -17,7 +17,7 @@ def getWinners(tweets, awards_list, nominees_lists):
         aggregate the winners from each award name 
         
     """
-    pattern = re.compile(r"(.*)(won\s|wins\s|receive\s|get\s|got(.*)?")
+    pattern = re.compile(r"(.*)(won\s|wins\s|receive\s|get\s|got)(.*)?")
     for award in awards_list:
         nominee_list = nominees_lists[award]
         awardToWinner[award] = getWinner(tweets, pattern, award, nominee_list)
@@ -33,7 +33,7 @@ def getWinner(tweets, pattern, award_name, nominees_list):
         matches =  pattern.match(tweet)
 
         if matches and matches.group(1) and matches.group(1).strip() in nominees_list:
-            # if matches.group(3) and contains_award_name(matches.group(3), award_name):
+            if matches.group(3) and contains_award_name(matches.group(3), award_name):
                 winner = matches.group(1).strip()
                 voting[winner] += 1
 
@@ -46,29 +46,32 @@ def getNominees(tweets, awards_list):
     """
         gets all the nominees of a given an award names
     """
-    pattern = re.compile(r"(.*)(nominee\s|is nominated\s|are nominated\s|have been nominated\s|was nominated\s)(.*)?")
+    pattern = re.compile(r"(.*)(nomin|nominee\s|is nominated\s|are nominated\s|was nominated\s|for \s)(.*)?")
     for award in awards_list:
         awardToNomineesMap[award] = getNominee(tweets, pattern, award)
     
 
 def getNominee(tweets, pattern, award):
+    print("AWARD: ", award)
     voting = {}
     for tweet in tweets:
         matches =  pattern.match(tweet)
 
         if matches and matches.group(1):
-            nominee_text = matches.group(1).strip()
-            possible_nominees = get_named_entities(nominee_text)
-            #print("possible eintities: ")
-            #print(possible_nominees)
-            for nominee in possible_nominees:
-                if nominee in voting:
-                    voting[nominee] += 1
-                else:
-                    voting[nominee] = 1
+            if matches.group(3) and contains_award_name(matches.group(3), award):
+                nominee_text = matches.group(1).strip()
+                possible_nominees = get_possible_nominees(nominee_text)
 
-    voted_nominee = max(voting, key=voting.get)
-    return voted_nominee
+                for nominee in possible_nominees:
+                    nominee = nominee.strip()
+                    if nominee in voting:
+                        voting[nominee] += 1
+                    else:
+                        voting[nominee] = 1
+
+    print(dict(sorted(voting.items(), reverse=True, key=lambda x:x[1])))
+    #voted_nominee = max(voting, key=voting.get)
+    return award
 
 
 def getAwardCategories(tweets):
@@ -116,8 +119,8 @@ def getHosts(awards_ceremony_name, tweets):
                 else:
                     voting[host] = 1
 
-    print("Host Viting")
-    print(voting)
+    # print("Host Viting")
+    # print(voting)
     voted_host = max(voting, key=voting.get)
     return voted_host
 
@@ -127,14 +130,18 @@ def main():
     tweets = getTweets("gg2013.json", False)
     awardAnswers, nomineeAnswers = getAnswers('2013')
 
+    for tweet in tweets:
+        if "presenter" in tweet or "presenting" in tweet or "presented" in tweet:
+            print(tweet)
+
     # getWinners(lower_case_tweets, awardAnswers, nomineeAnswers)
     # print(awardToWinner)
 
-    getNominees(tweets, awardAnswers)
-    print(awardToNomineesMap)
+    # getNominees(tweets, awardAnswers)
+    # print(awardToNomineesMap)
 
-    host = getHosts("gg", tweets)
-    print(host)
+    #host = getHosts("gg", tweets)
+    #print(host)
 
     #awardAnswers, nomineeAnswers = getAnswers('2013')
     #print(getAwardCategories(tweets))
