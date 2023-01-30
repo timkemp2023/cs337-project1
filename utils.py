@@ -46,7 +46,7 @@ def getAnswers(year):
     return awardsList, awardsToNominees
 
 
-def contains_award_name(match, award_name):
+def contains_award_name(match, award_name, THRESHOLD):
     counter = 0
     #award_name_set = award_name.split(" ")
     
@@ -55,7 +55,7 @@ def contains_award_name(match, award_name):
     match_set = frozenset([word for word in match.split(" ") if word not in stopwords.words("english")])
 
     #removes stop words and returns true if the overlap in words is 3 or more.
-    return len(award_name_set&match_set) >= 3
+    return len(award_name_set&match_set) >= THRESHOLD
 
 
 def get_named_entities(text):
