@@ -37,7 +37,7 @@ def getWinner(tweets, pattern, award_name, nominees_list):
         matches =  pattern.match(tweet)
 
         if matches and matches.group(1) and matches.group(1).strip() in nominees_list:
-            if matches.group(3) and contains_award_name(matches.group(3), award_name):
+            if matches.group(3) and contains_award_name(matches.group(3), award_name, 3):
                 winner = matches.group(1).strip()
                 voting[winner] += 1
 
@@ -50,7 +50,7 @@ def getNominees(tweets, awards_list):
     """
         gets all the nominees of a given an award names
     """
-    pattern = re.compile(r"(.*)(nominee|nominate)(.*)?")
+    pattern = re.compile(r"(.*)(deserve\s\d|won|didn't win|doesn't win|win\s|should have won|should've won|nomin|nominee\s|is nominated\s|are nominated\s|was nominated\s|for \s)(.*)?")
     for award in awards_list:
         awardToNomineesMap[award] = getNominee(tweets, pattern, award)
     
@@ -62,10 +62,17 @@ def getNominee(tweets, pattern, award):
         matches =  pattern.match(tweet)
 
         if matches and matches.group(1):
-            if matches.group(3) and contains_award_name(matches.group(3), award):
+            if matches.group(3) and contains_award_name(matches.group(3), award, 1):
                 nominee_text = matches.group(1).strip()
                 possible_nominees = get_possible_nominees(nominee_text)
+                print(possible_nominees)
 
+                for nominee in possible_nominees:
+                    if 'actor' or 'actress' or 'director' in award:
+                        pass
+                    else:
+                        movie = ia.get_movie(nominee)
+                        print(movie)
                 for nominee in possible_nominees:
                     nominee = nominee.strip()
                     if nominee in voting:
@@ -73,8 +80,9 @@ def getNominee(tweets, pattern, award):
                     else:
                         voting[nominee] = 1
 
-    print(dict(sorted(voting.items(), reverse=True, key=lambda x:x[1])))
+    #print(dict(sorted(voting.items(), reverse=True, key=lambda x:x[1])))
     #voted_nominee = max(voting, key=voting.get)
+    print(voting)
     return award
 
 
