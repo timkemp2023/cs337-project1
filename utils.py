@@ -3,6 +3,7 @@ from nltk.corpus import stopwords
 import spacy
 import re
 from spacy.lang.en import English
+import imdb
 #import wikipediaapi
 
 nlp = English()
@@ -99,3 +100,4 @@ def scrapeOfficialAwardsList():
         awardsList[awardName.split(":")[0].strip()] = 0
     
     return awardsList
+
