@@ -3,7 +3,7 @@ from nltk.corpus import stopwords
 import spacy
 import re
 from spacy.lang.en import English
-import wikipediaapi
+#import wikipediaapi
 
 nlp = English()
 

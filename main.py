@@ -1,8 +1,9 @@
 from utils import *
 import re
-import imdb
-ia = imdb.Cinemagoer()
+#import imdb
 from spacy.lang.en.stop_words import STOP_WORDS
+
+#ia = imdb.Cinemagoer()
 
 # awardToNomineesMap maps award_name to a list of nominees for that award
 awardToNomineesMap = {}
@@ -49,7 +50,7 @@ def getNominees(tweets, awards_list):
     """
         gets all the nominees of a given an award names
     """
-    pattern = re.compile(r"(.*)(nomin|nominee\s|is nominated\s|are nominated\s|was nominated\s|for \s)(.*)?")
+    pattern = re.compile(r"(.*)(nominee|nominate)(.*)?")
     for award in awards_list:
         awardToNomineesMap[award] = getNominee(tweets, pattern, award)
     
@@ -159,21 +160,21 @@ def main():
     tweets = getTweets("gg2013.json", False)
     awardAnswers, nomineeAnswers = getAnswers('2013')
 
-    for tweet in tweets:
-        if "presenter" in tweet or "presenting" in tweet or "presented" in tweet:
-            print(tweet)
+    # for tweet in tweets:
+    #     if "presenter" in tweet or "presenting" in tweet or "presented" in tweet:
+    #         print(tweet)
 
     # getWinners(lower_case_tweets, awardAnswers, nomineeAnswers)
     # print(awardToWinner)
 
-    # getNominees(tweets, awardAnswers)
-    # print(awardToNomineesMap)
+    getNominees(tweets, awardAnswers)
+    print(awardToNomineesMap)
 
     #host = getHosts("gg", tweets)
     #print(host)
 
     #awardAnswers, nomineeAnswers = getAnswers('2013')
-    print(getAwardCategories(lower_case_tweets))
+    #print(getAwardCategories(lower_case_tweets))
     
 
 if __name__ == "__main__":
