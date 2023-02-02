@@ -2,11 +2,10 @@ import json
 from nltk.corpus import stopwords
 import spacy
 import re
-from spacy.lang.en import English
-import imdb
-#import wikipediaapi
 
-nlp = English()
+
+nlp = spacy.load("en_core_web_sm")
+
 
 def getTweetsTexts(tweets, lower_case=True):
     """
@@ -52,14 +51,14 @@ def contains_award_name(match, award_name, THRESHOLD):
     #award_name_set = award_name.split(" ")
     
     #trying the set method because it is O(n+m), while this current method is O(m^2)
-    award_name_set = frozenset([word for word in award_name.split(" ") if word not in stopwords.words("english")])
-    match_set = frozenset([word for word in match.split(" ") if word not in stopwords.words("english")])
+    award_name_set = frozenset([word for word in award_name.split(" ") if word not in set(stopwords.words("english"))])
+    match_set = frozenset([word for word in match.split(" ") if word not in set(stopwords.words("english"))])
 
     #removes stop words and returns true if the overlap in words is 3 or more.
     return len(award_name_set&match_set) >= THRESHOLD
 
 
-def get_named_entities(text):
+def get_people(text):
     named_entities = []
     doc = nlp(text)
 
@@ -72,32 +71,19 @@ def get_named_entities(text):
 
     return named_entities
 
-def get_possible_nominees(text):
+def get_possible_entities(text):
     pattern = re.compile(r"(?:[A-Z][A-Za-z]*\s)+")
     matches = pattern.findall(text)
     return matches
 
 
-# if __name__ == "__main__":
-#     text = "Leo Dicaprio and Les Miserables, and even #ARGO have been nominated for golden globe"
-#     print(get_possible_nominees(text))
+def get_chunks(text):
+    doc = nlp(text)
+    return [chunk for chunk in doc.noun_chunks]
 
-def scrapeOfficialAwardsList():
-    # used as a benchmark to gather all awards there is avaliable and vote on them based on tweets match to collect the ones seen from 
-    # the tweets
-    wiki_wiki = wikipediaapi.Wikipedia('en')
-    page_py = wiki_wiki.page("Golden_Globe_Awards")
-    awardCategoriesWikipedia = page_py.section_by_title("Categories")
-    motionPictureAwards = awardCategoriesWikipedia.section_by_title("Motion picture awards")
-    televisionAwards = awardCategoriesWikipedia.section_by_title("Television awards")
-    motionPictureAwardsList = motionPictureAwards.text.split("\n")
-    televisionAwardsList = televisionAwards.text.split("\n")
-    awardsList = {}
-    for awardName in motionPictureAwardsList:
-        awardsList[awardName.split(":")[0].strip()] = 0
-    
-    for awardName in televisionAwardsList:
-        awardsList[awardName.split(":")[0].strip()] = 0
-    
-    return awardsList
+
+if __name__ == '__main__':
+
+    text = "Movie Director wins best director of a motion picture"
+    print(get_chunks(text))
 
