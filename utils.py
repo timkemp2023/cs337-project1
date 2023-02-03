@@ -1,8 +1,7 @@
 import json
+import re
 from nltk.corpus import stopwords
 import spacy
-import re
-
 
 nlp = spacy.load("en_core_web_sm")
 
@@ -80,6 +79,13 @@ def get_possible_entities(text):
 def get_chunks(text):
     doc = nlp(text)
     return [chunk for chunk in doc.noun_chunks]
+
+
+def check_award_type(award):
+    if "actor" in award or "actress" in award or "director" in award:
+        return "person"
+    else:
+        return "movie"
 
 
 if __name__ == '__main__':

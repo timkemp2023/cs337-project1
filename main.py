@@ -1,8 +1,8 @@
 from utils import *
+from db_utils import *
 import re
 import nltk
 import spacy
-from spacy.lang.en.stop_words import STOP_WORDS
 
 
 # compiles the winners of all awards
