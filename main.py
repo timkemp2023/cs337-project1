@@ -1,7 +1,6 @@
 from utils import *
 from db_utils import *
 import re
-import nltk
 import spacy
 
 
@@ -13,7 +12,7 @@ def getWinners(tweets, awards_list):
     """
     # map award to winners
     awardToWinner = {}
-    pattern = re.compile(r"(.*)(won\s|wins\s|receive\s|get\s|got)(.*)?")
+    pattern = re.compile(r"(.*)(won\s|wins\s)(.*)?")
     for award in awards_list:
         awardToWinner[award] = getWinner(tweets, pattern, award)
     
@@ -26,13 +25,15 @@ def getWinner(tweets, pattern, award_name):
         get winner of an award from the list of nominees of that award using the awardToNomineesMap
     """
     print("AWARD: ", award_name)
+    award_name_set = frozenset([word for word in award_name.split(" ") if word not in STOP_WORDS])
+
     voting = {}
     for tweet in tweets:
         matches =  pattern.match(tweet)
 
-        if matches and matches.group(1):
-            if matches.group(3) and contains_award_name(matches.group(3), award_name, 3):
-                possible_winners = get_possible_entities(matches.group(1))
+        if matches and matches.group(1) and matches.group(2):
+            if matches.group(3) and contains_award_name(matches.group(3), award_name_set, 3):
+                possible_winners = get_chunks(matches.group(1))
 
                 for winner in possible_winners:
                     if winner in voting:
@@ -195,7 +196,7 @@ def main():
     awardAnswers, nomineeAnswers = getAnswers('2013')
 
     # for tweet in tweets:
-    #     if "presenter" in tweet or "presenting" in tweet or "presented" in tweet:
+    #     if "RT @washingtonpost" in tweet:
     #         print(tweet)
 
     winners = getWinners(tweets, awardAnswers)

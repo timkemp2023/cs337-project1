@@ -1,11 +1,11 @@
 import json
 import re
-from nltk.corpus import stopwords
 import spacy
 
 nlp = spacy.load("en_core_web_sm")
 
 ENTITY_STOP_WORDS = ["RT", "Golden Globes"]
+STOP_WORDS = nlp.Defaults.stop_words
 
 def getTweetsTexts(tweets, lower_case=True):
     """
@@ -46,31 +46,42 @@ def getAnswers(year):
     return awardsList, awardsToNominees
 
 
-def contains_award_name(match, award_name, THRESHOLD):
+def contains_award_name(match, award_name_set, THRESHOLD):
     #trying the set method because it is O(n+m), while this current method is O(m^2)
-    award_name_set = frozenset([word for word in award_name.split(" ") if word not in set(stopwords.words("english"))])
-    match_set = frozenset([word for word in match.split(" ") if word not in set(stopwords.words("english"))])
+    match_set = frozenset([word for word in match.split(" ") if word not in STOP_WORDS])
 
     #removes stop words and returns true if the overlap in words is 3 or more.
     return len(award_name_set&match_set) >= THRESHOLD
 
 
-def get_people(text):
-    named_entities = []
+def check_for_award(award_name, chunks):
+    for chunk in chunks:
+        if chunk.text in award_name:
+            return True
+        else:
+            return False
+
+
+def get_propnouns(text):
+    prop_nouns = []
     doc = nlp(text)
 
-    for entity in doc.ents:
-        if entity.label_ == "PERSON":
-            named_entities.append(entity.text)
+    for token in doc:
+        if token.pos_ == "PROPN":
+            prop_nouns.append(token.text)
         # else:
         #     if '@' not in entity.text:
         #         print(entity.label_, ": ", entity.text)
 
-    return named_entities
+    return prop_nouns
 
 
 def get_possible_entities(text):
+    entities = set()
     pattern = re.compile(r"(?:[A-Z][A-Za-z]*\s)+")
+
+
+
     matches = pattern.findall(text)
     entities = [match.strip() for match in matches if match.strip() not in ENTITY_STOP_WORDS]
     return entities
@@ -78,7 +89,7 @@ def get_possible_entities(text):
 
 def get_chunks(text):
     doc = nlp(text)
-    return [chunk for chunk in doc.noun_chunks]
+    return [chunk for chunk in doc.noun_chunks if "RT" not in chunk.text and "#" not in chunk.text]
 
 
 def check_award_type(award):
@@ -90,6 +101,6 @@ def check_award_type(award):
 
 if __name__ == '__main__':
 
-    text = "Movie Director wins best director of a motion picture"
+    text = "RT @nbcbayarea: Adele's Skyfall wins for best original song - motion picture. #GoldenGlobes http://t.co/N2LbbLQQ"
     print(get_chunks(text))
 
