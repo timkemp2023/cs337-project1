@@ -30,16 +30,19 @@ def getWinner(tweets, pattern, award_name):
     for tweet in tweets:
         matches =  pattern.match(tweet)
 
-        if matches and matches.group(1) and matches.group(1).strip():
+        if matches and matches.group(1):
             if matches.group(3) and contains_award_name(matches.group(3), award_name, 3):
-                winner = matches.group(1).strip()
+                possible_winners = get_possible_entities(matches.group(1))
 
-                if winner in voting:
-                    voting[winner] += 1
-                else:
-                    voting[winner] = 1
+                for winner in possible_winners:
+                    if winner in voting:
+                        voting[winner] += 1
+                    else:
+                        voting[winner] = 1
 
+                    
     voted_winner = max(voting, key=voting.get)
+    print(voted_winner)
     return voted_winner
 
 
@@ -155,26 +158,6 @@ def getAwardCategories(tweets):
         
         matches1 = pattern.match(textBeforeVerb)
         matches2 = pattern.match(textAfterVerb)
-        # if matches2:
-        #     print("Text After is ", textAfterVerb, "\n")
-        #     print("tweet is ", tweet, "\n")
-        #     print("match is ", matches2, "\n\n")
-        
-        # if matches1:
-        #     print("Text Before is ", textBeforeVerb, "\n")
-        #     print("tweet is ", tweet, "\n ")
-        #     print("match is ", matches1, "\n\n")
-        match = None
-        if matches1:
-            match = matches1
-        if matches2:
-            match = matches2
-        # for officialName, count in officialAwards.items():
-        #     matches1FrozenSet = frozenset([word for word in matches2.group(0).split(" ")])
-        #     tweetFrozenSet = frozenset(officialName.split(" "))
-        #     if len(matches1FrozenSet&tweetFrozenSet) >= 2:
-        #         count += 1
-        # print("Map is ", officialAwards, "\n\n")
     
 
 
@@ -215,7 +198,7 @@ def main():
     #     if "presenter" in tweet or "presenting" in tweet or "presented" in tweet:
     #         print(tweet)
 
-    winners = getWinners(lower_case_tweets, awardAnswers)
+    winners = getWinners(tweets, awardAnswers)
     print(winners)
 
     # nominees = getNominees(tweets, awardAnswers)

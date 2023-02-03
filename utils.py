@@ -5,6 +5,7 @@ import spacy
 
 nlp = spacy.load("en_core_web_sm")
 
+ENTITY_STOP_WORDS = ["RT", "Golden Globes"]
 
 def getTweetsTexts(tweets, lower_case=True):
     """
@@ -46,9 +47,6 @@ def getAnswers(year):
 
 
 def contains_award_name(match, award_name, THRESHOLD):
-    counter = 0
-    #award_name_set = award_name.split(" ")
-    
     #trying the set method because it is O(n+m), while this current method is O(m^2)
     award_name_set = frozenset([word for word in award_name.split(" ") if word not in set(stopwords.words("english"))])
     match_set = frozenset([word for word in match.split(" ") if word not in set(stopwords.words("english"))])
@@ -70,10 +68,12 @@ def get_people(text):
 
     return named_entities
 
+
 def get_possible_entities(text):
     pattern = re.compile(r"(?:[A-Z][A-Za-z]*\s)+")
     matches = pattern.findall(text)
-    return matches
+    entities = [match.strip() for match in matches if match.strip() not in ENTITY_STOP_WORDS]
+    return entities
 
 
 def get_chunks(text):
