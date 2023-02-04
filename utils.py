@@ -4,10 +4,12 @@ import spacy
 
 nlp = spacy.load("en_core_web_sm")
 
-ENTITY_STOP_WORDS = {"i", "you", "u", "we", "he", "she", "a", "an", "they", "this", "anyone", "it", 'the'}
+ENTITY_STOP_WORDS = {"i", "you", "u", "we", "he", "she", "a", "an", "they", "this", "anyone", "it", 'the', 'us'}
+
 AWARD_STOP_WORDS = {'golden', 'globes', 'globe', 'golden globes', 'goldenglobes', 'oscar', 'oscars', 'congrats', 'congratulations', 
-'winner', 'best', 'actor', 'actress', 'performance', 'motion', 'picture', 'movie', 'film', 'screenplay', 'globes', 'award', 'awards', 
-'comedy', 'drama', 'musical', 'tv', 'television', 'original score', 'original song', 'foreign language film'}
+'winner', 'best', 'actor', 'actress', 'performance', 'motion', 'picture', 'movie', 'film', 'screenplay', 'animated', 'feature', 'globes', 'award', 'awards', 
+'comedy', 'drama', 'musical', 'tv', 'television', 'original score', 'original song', 'foreign language film', 'foreign', 'foreign language', 'language'
+'mini', 'miniseries', 'oh my god', 'awesome'}
 
 STOP_WORDS = nlp.Defaults.stop_words
 
@@ -16,14 +18,14 @@ ALL_STOP_WORDS = set().union(ENTITY_STOP_WORDS).union(AWARD_STOP_WORDS)
 
 def getTweetsTexts(tweets, lower_case=True):
     """
-        getTweetsTexts returns the list of texts from each tweet and creates a list of them
+        getTweetsTexts: returns the list of texts from each tweet and creates a list of them
         This is particulary useful since we will be reading texts every time in each function
 
     """
     texts = []
     for tweet in tweets:
         tweet = tweet['text']
-        tweet = re.sub(',', '', tweet)
+        tweet = re.sub('[,!?\.]', '', tweet)
         if lower_case:
             texts.append(tweet.lower())
         else:
@@ -42,12 +44,15 @@ def removeAwardStopWords(tweet):
     return " ".join(split_tweet)
 
 
-def contains_award_name(award_name, match, award_name_set):
+def contains_award_name(award_name, match, award_name_set, df):
+    """
+        contains_award_name: returns True if award name matches
+    """
     #trying the set method because it is O(n+m), while this current method is O(m^2)
     match_set = frozenset([word for word in match.lower().split(" ") if word not in STOP_WORDS])
 
     #removes stop words and returns true if the overlap in words is 3 or more.
-    return len(award_name_set&match_set) >= len(award_name_set)
+    return len(award_name_set&match_set) >= (len(award_name_set) - df)
 
 
 def get_people(text):

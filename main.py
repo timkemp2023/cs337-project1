@@ -61,38 +61,44 @@ def getNominees(tweets, awards_list):
         gets all the nominees of a given an award names
     """
     awardToNominees = {}
-    #pattern = re.compile(r"(.*)(didn't win|doesn't win|should have won|should've won|nominate|nominee)(.*)?")
+    pattern = re.compile(r"(.*)(didn't win|doesn't win|should have won|should've won|nominate|nominee|-|for\s|deserve)(.*)?")
 
     for award in awards_list:
-        awardToNominees[award] = getNominee(tweets, award)
+        awardToNominees[award] = getNominee(pattern, tweets, award)
 
     return awardToNominees
     
 
-def getNominee(tweets, award_name):
+def getNominee(pattern, tweets, award_name):
     print("AWARD: ", award_name)
     award_name_set = AWARD_NAMES_SET[award_name]
-
     voting = {}
+
     for tweet in tweets:
 
-        if contains_award_name(award_name, tweet.lower(), award_name_set) and 'present' not in tweet.lower():
-            possible_nominees = get_chunks(tweet)
-            #print(possible_nominees)
+        if 'comedy' in award_name or 'musical' in award_name:
+            df = 1
+        else:
+            df = 0
 
-            if 'actor' in award_name or 'actress' in award_name or 'director' in award_name or 'cecil' in award_name:
-                typed_nominees = [possible for possible in possible_nominees if possible in ACTORS]
-            else:
-                typed_nominees = [possible for possible in possible_nominees if possible in MOVIES]
+        if contains_award_name(award_name, tweet.lower(), award_name_set, df) and 'present' not in tweet.lower():
 
+                possible_nominees = get_chunks(tweet)
 
-            for winner in typed_nominees:
-                if winner in voting:
-                    voting[winner] += 1
+                if 'actor' in award_name or 'actress' in award_name or 'director' in award_name or 'cecil' in award_name:
+                    typed_nominees = [possible for possible in possible_nominees if possible in ACTORS]
                 else:
-                    voting[winner] = 1
+                    typed_nominees = [possible for possible in possible_nominees if possible in MOVIES]
+
+
+                for winner in typed_nominees:
+                    if winner in voting:
+                        voting[winner] += 1
+                    else:
+                        voting[winner] = 1
 
     sorted_voting = sorted(voting.items(), reverse=True, key=lambda x:x[1])
+    #print("SORTED VOTING: ", sorted_voting)
     voted_nominees = buildVotedList(sorted_voting, 4, True)
     print("VOTED NOMINEES", voted_nominees)
     return voted_nominees
@@ -100,14 +106,13 @@ def getNominee(tweets, award_name):
 
 def getPresenters(tweets, awards_list):
     awardToPresenters = {}
-    pattern = re.compile(r"(.*)(presenting|presented)(.*)")
+    pattern = re.compile(r"(.*)(presenting|presented|present)(.*)")
 
     for award in awards_list:
         awardToPresenters[award] = getPresenter(tweets, pattern, award)
 
 
 def getPresenter(tweets, pattern, award_name):
-    print("AWARD: ", award_name)
     award_name_set = AWARD_NAMES_SET[award_name]
 
     voting = {}
@@ -116,8 +121,7 @@ def getPresenter(tweets, pattern, award_name):
 
         if matches and matches.group(1) and matches.group(2):
             if matches.group(3) and contains_award_name(award_name, matches.group(3).lower(), award_name_set):
-
-                possible_presenters = get_chunks(matches.group(1))
+                possible_presenters = get_people(matches.group(1))
 
                 # if 'actor' in award_name or 'actress' in award_name or 'director' in award_name or 'cecil' in award_name:
                 #     typed_winners = [possible for possible in possible_winners if possible in ACTORS]
@@ -133,7 +137,6 @@ def getPresenter(tweets, pattern, award_name):
         
     sorted_voting = sorted(voting.items(), reverse=True, key=lambda x:x[1])
     voted_presenters = buildVotedList(sorted_voting, 2, False)
-    print("VOTED PRESENTERS: ", voted_presenters)
     return voted_presenters
 
 
@@ -198,7 +201,7 @@ def main():
     tweets = getTweets("gg2013.json", False)
 
     # for tweet in tweets:
-    #     if "zero dark thirty" in tweet.lower() and "win" in tweet and "Jessica Chastain" not in tweet:
+    #     if ("jessica" in tweet.lower() or 'kiefer' in tweet.lower()) and 'actor' in tweet:
     #         print(tweet)
 
     # winners = getWinners(tweets, OFFICIAL_AWARDS)
