@@ -141,6 +141,60 @@ def getAwardCategories(tweets):
     """
         gets all the award categories from given tweets
     """
+    pattern = re.compile(r"(.*)best(.*)-(.*)")
+    THRESHOLD = 3
+    award_patterns = ["NNP, NNP, HYPH, NNP, CC, NNP"]
+    for tweet in tweets:
+        matches = pattern.match(tweet)
+        if matches:
+            award_name = ""
+            #print(matches.group(2))
+            txt =  matches.group(2)
+            # if "christoph waltz" in txt:
+            #     print(tweet)
+            #print( matches.group(2))
+            if "#" in txt:
+                txt = txt.split("#")[0]
+            if ":" in txt:
+                txt = txt.split(":")[0]
+            #people = get_people(txt)
+            #print("people: ", people)
+            # print("text: ", txt)
+            processed_text = nlp(txt)
+            numWords = 0
+            for i in range(len(processed_text)):
+                word = processed_text[i]
+                if i+2 < len(processed_text):
+                    #print("fuck waltz ", word.text + " " + processed_text[i+1].text)
+                    if processed_text[i+1].text.capitalize() + " " + processed_text[i+2].text.capitalize() in ACTORS:
+                        break
+                if numWords > THRESHOLD:# or word.text in people:
+                    break
+                if word.pos_ == "NOUN":
+                    numWords += 1
+                if word.text == "tv":
+                     award_name += "television "
+                else:
+                    award_name += word.text + " "
+            if 1 <= award_name.count("-") < 2:
+                if len(award_name.split(" ")) == 5:
+                    print("award name: ", "best" + award_name)
+                    doc = nlp(award_name)
+                    i = 0
+                    matchPattern = True
+                    while (i < 4):
+                        if doc[i].tag_ == award_patterns[i]:
+                            continue
+                        else:
+                            matchPattern = False
+                        i += 1
+                    if matchPattern:
+                        print("award name: ", "best" + award_name)
+
+
+        
+
+    """
     pattern = re.compile(r"best(.*)")
     officialAwards = []
     for tweet in tweets:
@@ -163,7 +217,7 @@ def getAwardCategories(tweets):
         
         matches1 = pattern.match(textBeforeVerb)
         matches2 = pattern.match(textAfterVerb)
-    
+    """
 
 
 # gets all the hosts of the award show
@@ -196,6 +250,13 @@ def getHosts(tweets):
 def main():
     lower_case_tweets = getTweets("gg2013.json")
     tweets = getTweets("gg2013.json", False)
+    # tweet = "rt @goldenglobes: best actress in a motion picture - drama - jessica chastain - zero dark thirty - #goldenglobes"
+    # tweet2 = "rt @goldenglobes: best actor in a motion picture - comedy or musical - hugh jackman (@realhughjackman) - les miserables - #goldenglob"
+    # tweet3 = "rt @goldenglobes: best supporting actress in a tv movie series or miniseries - maggie smith - downtown abbey: season 2 - #goldenglobe"
+    
+    # print(get_chunks(tweet))
+    # print(get_chunks(tweet2))
+    # print(get_chunks(tweet3))
 
     # for tweet in tweets:
     #     if "zero dark thirty" in tweet.lower() and "win" in tweet and "Jessica Chastain" not in tweet:
@@ -204,8 +265,8 @@ def main():
     # winners = getWinners(tweets, OFFICIAL_AWARDS)
     # print(winners)
 
-    nominees = getNominees(tweets, OFFICIAL_AWARDS)
-    print(nominees)
+    # nominees = getNominees(tweets, OFFICIAL_AWARDS)
+    # print(nominees)
     
     # presenters = getPresenters(tweets, OFFICIAL_AWARDS)
     # print(presenters)
@@ -213,7 +274,7 @@ def main():
     # hosts = getHosts(tweets)
     # print(hosts)
 
-    #print(getAwardCategories(lower_case_tweets))
+    print(getAwardCategories(lower_case_tweets))
 
     
 
