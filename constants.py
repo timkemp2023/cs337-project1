@@ -44,4 +44,5 @@ AWARD_NAMES_SET = {
     "best performance by an actor in a television series - comedy or musical": set({"best", "tv", "actor", "comedy", "musical"})
 }
 
+OFFICIAL_AWARDS = AWARD_NAMES_SET.keys()
 

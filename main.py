@@ -1,5 +1,5 @@
 from utils import *
-from constants import AWARD_NAMES_SET, MOVIES, ACTORS
+from constants import AWARD_NAMES_SET, OFFICIAL_AWARDS, MOVIES, ACTORS
 import re
 import spacy
 
@@ -27,14 +27,13 @@ def getWinner(tweets, pattern, award_name):
     """
     award_name_set = AWARD_NAMES_SET[award_name]
 
-    test_award = "best performance by an actor in a supporting role in a series, mini-series or motion picture made for television"
-
     voting = {}
     for tweet in tweets:
         matches =  pattern.match(tweet)
 
         if matches and matches.group(1) and matches.group(2):
             if matches.group(3) and contains_award_name(award_name, matches.group(3).lower(), award_name_set):
+
                 possible_winners = get_chunks(matches.group(1))
 
                 if 'actor' in award_name or 'actress' in award_name or 'director' in award_name or 'cecil' in award_name:
@@ -48,7 +47,11 @@ def getWinner(tweets, pattern, award_name):
                     else:
                         voting[winner] = 1
 
-    voted_winner = max(voting, key=voting.get)
+    if voting:
+        voted_winner = max(voting, key=voting.get)
+    else:
+        voted_winner = None
+
     return voted_winner
 
 
@@ -73,8 +76,9 @@ def getNominee(tweets, award_name):
     voting = {}
     for tweet in tweets:
 
-        if contains_award_name(award_name, tweet.lower(), award_name_set):
+        if contains_award_name(award_name, tweet.lower(), award_name_set) and 'present' not in tweet.lower():
             possible_nominees = get_chunks(tweet)
+            #print(possible_nominees)
 
             if 'actor' in award_name or 'actress' in award_name or 'director' in award_name or 'cecil' in award_name:
                 typed_nominees = [possible for possible in possible_nominees if possible in ACTORS]
@@ -89,40 +93,48 @@ def getNominee(tweets, award_name):
                     voting[winner] = 1
 
     sorted_voting = sorted(voting.items(), reverse=True, key=lambda x:x[1])
-    voted_nominees = buildNomineeList(sorted_voting)
+    voted_nominees = buildVotedList(sorted_voting, 4, True)
     print("VOTED NOMINEES", voted_nominees)
     return voted_nominees
 
 
 def getPresenters(tweets, awards_list):
     awardToPresenters = {}
-    pattern = re.compile(r"(.*)(present)(.*)")
+    pattern = re.compile(r"(.*)(presenting|presented)(.*)")
 
     for award in awards_list:
         awardToPresenters[award] = getPresenter(tweets, pattern, award)
 
 
-def getPresenter(tweets, pattern, award):
-    print("AWARD: ", award)
+def getPresenter(tweets, pattern, award_name):
+    print("AWARD: ", award_name)
+    award_name_set = AWARD_NAMES_SET[award_name]
+
     voting = {}
-
     for tweet in tweets:
-        matches = pattern.match(tweet)
+        matches =  pattern.match(tweet)
 
-        if matches and matches.group(1):
-            if matches.group(3) and contains_award_name(matches.group(3), award, 2):
-                presenter_text = matches.group(1).strip()
-                possible_presenters = get_possible_entities(presenter_text)
+        if matches and matches.group(1) and matches.group(2):
+            if matches.group(3) and contains_award_name(award_name, matches.group(3).lower(), award_name_set):
 
-                for presenter in possible_presenters:
-                    presenter = presenter.strip()
-                    if presenter in voting:
-                        voting[presenter] += 1
+                possible_presenters = get_chunks(matches.group(1))
+
+                # if 'actor' in award_name or 'actress' in award_name or 'director' in award_name or 'cecil' in award_name:
+                #     typed_winners = [possible for possible in possible_winners if possible in ACTORS]
+                # else:
+                #     typed_winners = [possible for possible in possible_winners if possible in MOVIES]
+
+                for winner in possible_presenters:
+                    if winner in voting:
+                        voting[winner] += 1
                     else:
-                        voting[presenter] = 1
+                        voting[winner] = 1
 
-    print(voting)
-    return award
+        
+    sorted_voting = sorted(voting.items(), reverse=True, key=lambda x:x[1])
+    voted_presenters = buildVotedList(sorted_voting, 2, False)
+    print("VOTED PRESENTERS: ", voted_presenters)
+    return voted_presenters
 
 
 def getAwardCategories(tweets):
@@ -155,7 +167,7 @@ def getAwardCategories(tweets):
 
 
 # gets all the hosts of the award show
-def getHosts(awards_ceremony_name, tweets):
+def getHosts(tweets):
     """
         gets all the hosts for the given awards_ceremony_name from the tweets
     """
@@ -168,7 +180,7 @@ def getHosts(awards_ceremony_name, tweets):
         if matches and matches.group(1):
             host_text = matches.group(1).strip()
             # *** GET PEOPLE ***
-            possible_hosts = get_chunks(host_text)
+            possible_hosts = get_people(host_text)
 
             for host in possible_hosts:
                 if host in voting:
@@ -176,33 +188,33 @@ def getHosts(awards_ceremony_name, tweets):
                 else:
                     voting[host] = 1
 
-    # print("Host Viting")
-    # print(voting)
-    voted_host = max(voting, key=voting.get)
-    return voted_host
+    sorted_voting = sorted(voting.items(), reverse=True, key=lambda x:x[1])
+    voted_host = buildVotedList(sorted_voting, 2, False)
+    return {"hosts": voted_host}
 
 
 def main():
     lower_case_tweets = getTweets("gg2013.json")
     tweets = getTweets("gg2013.json", False)
 
-    awardAnswers, _ = getAnswers('2013')
+    # for tweet in tweets:
+    #     if "zero dark thirty" in tweet.lower() and "win" in tweet and "Jessica Chastain" not in tweet:
+    #         print(tweet)
 
-    # winners = getWinners(tweets, awardAnswers)
+    # winners = getWinners(tweets, OFFICIAL_AWARDS)
     # print(winners)
 
-    nominees = getNominees(tweets, awardAnswers)
+    nominees = getNominees(tweets, OFFICIAL_AWARDS)
     print(nominees)
     
-    # presenters = getPresenters(tweets, awardAnswers)
+    # presenters = getPresenters(tweets, OFFICIAL_AWARDS)
     # print(presenters)
 
-    #host = getHosts("gg", tweets)
-    #print(host)
+    # hosts = getHosts(tweets)
+    # print(hosts)
 
     #print(getAwardCategories(lower_case_tweets))
 
-    
     
 
 if __name__ == "__main__":
