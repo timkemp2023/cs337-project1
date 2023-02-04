@@ -65,9 +65,27 @@ def get_people(text):
 
     return people
 
+def get_people_first_names(text):
+    people = []
+    doc = nlp(text)
+
+    for token in doc.ents:
+        if token.label_ == "PERSON":
+            #print("first name: ", token.text.split(" ")[0])
+            people.append(token.text.split(" ")[0])
+    
+    # print("first name list: ", people)
+    return people
+
+def is_person(token):
+    if token.label_ == "PERSON":
+        return True
+    return False
+    
+
 
 def get_chunks(text):
-    filtered_text = removeAwardStopWords(text)
+    filtered_text = text #removeAwardStopWords(text)
     doc = nlp(filtered_text)
     chunks = []
     for chunk in doc.noun_chunks:
