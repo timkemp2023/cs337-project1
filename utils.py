@@ -4,8 +4,13 @@ import spacy
 
 nlp = spacy.load("en_core_web_sm")
 
-ENTITY_STOP_WORDS = ["RT", "Golden Globes"]
+ENTITY_STOP_WORDS = {"RT", "Golden Globes", "GoldenGlobes", "And", "I", "You", "We"}
+AWARD_STOP_WORDS = {'Congrats', 'Congratulations', 'Best', 'Actor', 'Actress', 'Motion', 'Picture', 'Movie', 'Film', 'Screenplay', 'Globes', 'Award', 'Awards', 'Comedy', 'Drama', 'Musical'}
 STOP_WORDS = nlp.Defaults.stop_words
+
+ALL_STOP_WORDS = set().union(ENTITY_STOP_WORDS).union(AWARD_STOP_WORDS).union(STOP_WORDS)
+
+
 
 def getTweetsTexts(tweets, lower_case=True):
     """
@@ -28,6 +33,12 @@ def getTweets (file_name, lower_case=True):
     return getTweetsTexts(tweets, lower_case)
 
 
+def removeStopWords(tweet):
+    split_tweet = [word for word in tweet.split(" ") if word not in ALL_STOP_WORDS]
+    return " ".join(split_tweet)
+
+
+
 def getAnswers(year):
     awardsToNominees = {}
     awardsList = []
@@ -46,12 +57,12 @@ def getAnswers(year):
     return awardsList, awardsToNominees
 
 
-def contains_award_name(match, award_name_set, THRESHOLD):
+def contains_award_name(award_name, match, award_name_set):
     #trying the set method because it is O(n+m), while this current method is O(m^2)
-    match_set = frozenset([word for word in match.split(" ") if word not in STOP_WORDS])
+    match_set = frozenset([word.replace(",", "") for word in match.lower().split(" ") if word not in STOP_WORDS])
 
     #removes stop words and returns true if the overlap in words is 3 or more.
-    return len(award_name_set&match_set) >= THRESHOLD
+    return len(award_name_set&match_set) >= len(award_name_set)
 
 
 def check_for_award(award_name, chunks):
@@ -62,45 +73,37 @@ def check_for_award(award_name, chunks):
             return False
 
 
-def get_propnouns(text):
+def get_people(text):
     prop_nouns = []
     doc = nlp(text)
 
-    for token in doc:
-        if token.pos_ == "PROPN":
+    for token in doc.ents:
+        if token.label_ == "PERSON":
             prop_nouns.append(token.text)
-        # else:
-        #     if '@' not in entity.text:
-        #         print(entity.label_, ": ", entity.text)
 
     return prop_nouns
 
 
-def get_possible_entities(text):
-    entities = set()
-    pattern = re.compile(r"(?:[A-Z][A-Za-z]*\s)+")
-
-
-
-    matches = pattern.findall(text)
-    entities = [match.strip() for match in matches if match.strip() not in ENTITY_STOP_WORDS]
-    return entities
-
-
 def get_chunks(text):
     doc = nlp(text)
-    return [chunk for chunk in doc.noun_chunks if "RT" not in chunk.text and "#" not in chunk.text]
+    chunks = []
+    for chunk in doc.noun_chunks:
+        text = chunk.text
+        if "RT" not in chunk.text and "#" not in chunk.text and "@" not in chunk.text:
+            if text not in ALL_STOP_WORDS:
+                chunks.append(text.replace('"', ''))
+    return chunks
 
+def buildNomineeList(nominee_voting):
+    if len(nominee_voting) == 0:
+        return []
+    
+    nominees = []
+    nominee_voting = nominee_voting[1:]
+    num_noms = min(4, len(nominee_voting))
 
-def check_award_type(award):
-    if "actor" in award or "actress" in award or "director" in award:
-        return "person"
-    else:
-        return "movie"
+    for i in range(num_noms):
+        nominees.append(nominee_voting[i][0])
+    return nominees
 
-
-if __name__ == '__main__':
-
-    text = "RT @nbcbayarea: Adele's Skyfall wins for best original song - motion picture. #GoldenGlobes http://t.co/N2LbbLQQ"
-    print(get_chunks(text))
 
