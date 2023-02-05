@@ -144,33 +144,27 @@ def getAwardCategories(tweets):
     """
         getAwardCategories: returns all the award categories from given tweets
     """
-    pattern = re.compile(r"(.*)best(.*)-(.*)")
+    voting = {}
+    pattern = re.compile(r"(.*)best(.*)\s-\s(.*)")
     THRESHOLD = 3
-    award_patterns = ["NNP, NNP, HYPH, NNP, CC, NNP"]
+
     for tweet in tweets:
         matches = pattern.match(tweet)
         if matches:
             award_name = ""
-            #print(matches.group(2))
+
             txt =  matches.group(2)
-            # if "christoph waltz" in txt:
-            #     print(tweet)
-            #print( matches.group(2))
+    
             if "#" in txt:
                 txt = txt.split("#")[0]
             if ":" in txt:
                 txt = txt.split(":")[0]
-            #people = get_people(txt)
-            #print("people: ", people)
-            # print("text: ", txt)
+
             processed_text = nlp(txt)
             numWords = 0
             for i in range(len(processed_text)):
                 word = processed_text[i]
-                if i+2 < len(processed_text):
-                    #print("fuck waltz ", word.text + " " + processed_text[i+1].text)
-                    if processed_text[i+1].text.capitalize() + " " + processed_text[i+2].text.capitalize() in ACTORS:
-                        break
+
                 if numWords > THRESHOLD:# or word.text in people:
                     break
                 if word.pos_ == "NOUN":
@@ -180,47 +174,28 @@ def getAwardCategories(tweets):
                 else:
                     award_name += word.text + " "
             if 1 <= award_name.count("-") < 2:
-                if len(award_name.split(" ")) == 5:
-                    print("award name: ", "best" + award_name)
-                    doc = nlp(award_name)
-                    i = 0
-                    matchPattern = True
-                    while i < 4 or i < len(doc)-1:
-                        if doc[i].tag_ == award_patterns[i]:
-                            continue
-                        else:
-                            matchPattern = False
-                        i += 1
-                    if matchPattern:
-                        print("award name: ", "best" + award_name)
+                
+                award_name = "best " + award_name.strip()
 
+                name_pattern = re.compile(r"(.*)\s-\s([/A-Za-z\s]*)")
+                name_matches = name_pattern.match(award_name)
 
-        
+                if name_matches and name_matches.group(2):
+                    name = str.title(name_matches.group(2).strip())
 
-    """
-    pattern = re.compile(r"best(.*)")
-    officialAwards = []
-    for tweet in tweets:
-        
-        my_doc = nlp(tweet)
-        taggedTweet = []
-        for token in my_doc:
-            taggedTweet.append(token)
-        textBeforeVerb = ""
-        textAfterVerb = ""
-        for token in taggedTweet:
-            lexeme = nlp.vocab[token.text]
-            if token.pos != "VERB" and lexeme.is_stop == False:
-                textBeforeVerb += token.text
-        for token in taggedTweet[::-1]:
-            lexeme = nlp.vocab[token.text]
-            if token.pos != "VERB" and lexeme.is_stop == False:
-                textAfterVerb += token.text + "  "
+                    if name in MOVIES or name in ACTORS:
+                        award_name = award_name.split("-")[0].strip()
 
-        
-        matches1 = pattern.match(textBeforeVerb)
-        matches2 = pattern.match(textAfterVerb)
-    """
+                if award_name in voting:
+                    voting[award_name] += 1
+                else:
+                    voting[award_name] = 1
+    
+    sorted_voting = sorted(voting.items(), reverse=True, key=lambda x:x[1])
+    voted_awards = buildVotedList(sorted_voting, 17, False)
+    # for voted_award in voted_awards:
+    #     print(voted_award)
+    return voted_awards
 
 
 def getHosts(tweets):
@@ -260,8 +235,8 @@ def main():
     # print(get_chunks(tweet2))
     # print(get_chunks(tweet3))
 
-    winners = getWinners(tweets, OFFICIAL_AWARDS)
-    print(winners)
+    # winners = getWinners(tweets, OFFICIAL_AWARDS)
+    # print(winners)
 
     # nominees = getNominees(tweets, OFFICIAL_AWARDS)
     # print(nominees)
@@ -272,7 +247,7 @@ def main():
     # hosts = getHosts(tweets)
     # print(hosts)
 
-    # print(getAwardCategories(lower_case_tweets))
+    print(getAwardCategories(lower_case_tweets))
 
     
 

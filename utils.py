@@ -25,7 +25,7 @@ def getTweetsTexts(tweets, lower_case=True):
     texts = []
     for tweet in tweets:
         tweet = tweet['text']
-        tweet = re.sub('[,!?\.]', '', tweet)
+        tweet = re.sub('[,!?\.\"\']', '', tweet)
         if lower_case:
             texts.append(tweet.lower())
         else:
@@ -95,7 +95,7 @@ def get_chunks(text):
     return chunks
 
 
-def buildVotedList(voting, threshold, ignore_first):
+def buildVotedList(voting, threshold, ignore_first=False):
     if len(voting) == 0:
         return []
     
@@ -108,7 +108,11 @@ def buildVotedList(voting, threshold, ignore_first):
         voted.append(voting[i][0])
     return voted
 
+# def capitalize_name(text):
+#     words = [word.capitalize() for word in text.split(" ")]
+#     return " ".join(words)
+
 
 if __name__ == "__main__":
-    text = 'Wreck-It Ralph'
-    print(get_chunks(text))
+    text = 'tim kemp'
+    print(text.capitalize())
