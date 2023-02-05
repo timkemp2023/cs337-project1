@@ -108,11 +108,18 @@ def buildVotedList(voting, threshold, ignore_first=False):
         voted.append(voting[i][0])
     return voted
 
-# def capitalize_name(text):
-#     words = [word.capitalize() for word in text.split(" ")]
-#     return " ".join(words)
 
+def create_readable_output(winners, nominees, presenters, hosts, awards):
+    pass
 
-if __name__ == "__main__":
-    text = 'tim kemp'
-    print(text.capitalize())
+def create_json_output(winners, nominees, presenters, hosts, awards):
+    output = {}
+    output["hosts"] = hosts
+    for award in awards:
+        output[award] = {}
+        output['winner'] = winners[award]
+        output['nominees'] = nominees[award]
+        output['presenters'] = presenters[awards]
+
+    json.dump("autograder_output.json")
+

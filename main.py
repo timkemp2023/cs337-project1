@@ -193,8 +193,7 @@ def getAwardCategories(tweets):
     
     sorted_voting = sorted(voting.items(), reverse=True, key=lambda x:x[1])
     voted_awards = buildVotedList(sorted_voting, 17, False)
-    # for voted_award in voted_awards:
-    #     print(voted_award)
+
     return voted_awards
 
 
@@ -221,34 +220,21 @@ def getHosts(tweets):
 
     sorted_voting = sorted(voting.items(), reverse=True, key=lambda x:x[1])
     voted_host = buildVotedList(sorted_voting, 2, False)
-    return {"hosts": voted_host}
+    return voted_host
 
 
 def main():
     lower_case_tweets = getTweets("gg2013.json")
     tweets = getTweets("gg2013.json", False)
-    # tweet = "rt @goldenglobes: best actress in a motion picture - drama - jessica chastain - zero dark thirty - #goldenglobes"
-    # tweet2 = "rt @goldenglobes: best actor in a motion picture - comedy or musical - hugh jackman (@realhughjackman) - les miserables - #goldenglob"
-    # tweet3 = "rt @goldenglobes: best supporting actress in a tv movie series or miniseries - maggie smith - downtown abbey: season 2 - #goldenglobe"
-    
-    # print(get_chunks(tweet))
-    # print(get_chunks(tweet2))
-    # print(get_chunks(tweet3))
 
-    # winners = getWinners(tweets, OFFICIAL_AWARDS)
-    # print(winners)
+    winners = getWinners(tweets, OFFICIAL_AWARDS)
+    nominees = getNominees(tweets, OFFICIAL_AWARDS)
+    presenters = getPresenters(tweets, OFFICIAL_AWARDS)
+    hosts = getHosts(tweets)
+    awards = getAwardCategories(lower_case_tweets)
 
-    # nominees = getNominees(tweets, OFFICIAL_AWARDS)
-    # print(nominees)
-    
-    # presenters = getPresenters(tweets, OFFICIAL_AWARDS)
-    # print(presenters)
-
-    # hosts = getHosts(tweets)
-    # print(hosts)
-
-    print(getAwardCategories(lower_case_tweets))
-
+    create_readable_output(winners, nominees, presenters, hosts, awards)
+    create_json_output(winners, nominees, presenters, hosts, OFFICIAL_AWARDS)
     
 
 if __name__ == "__main__":
