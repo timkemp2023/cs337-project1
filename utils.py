@@ -4,12 +4,12 @@ import spacy
 
 nlp = spacy.load("en_core_web_sm")
 
-ENTITY_STOP_WORDS = {"i", "you", "u", "we", "he", "she", "a", "an", "they", "this", "anyone", "it", 'the', 'us'}
+ENTITY_STOP_WORDS = {"i", "you", "u", "we", "he", "she", "a", "an", "they", "this", "anyone", "it", 'the', 'that', 'us', 'what', 'folks'}
 
 AWARD_STOP_WORDS = {'golden', 'globes', 'globe', 'golden globes', 'goldenglobes', 'oscar', 'oscars', 'congrats', 'congratulations', 
 'winner', 'best', 'actor', 'actress', 'performance', 'motion', 'picture', 'movie', 'film', 'screenplay', 'animated', 'feature', 'globes', 'award', 'awards', 
-'comedy', 'drama', 'musical', 'tv', 'television', 'original score', 'original song', 'foreign language film', 'foreign', 'foreign language', 'language'
-'mini', 'miniseries', 'oh my god', 'awesome'}
+'comedy', 'drama', 'musical', 'tv', 'song', 'television', 'original', 'original score', 'original song', 'foreign language film', 'foreign', 'foreign language', 'language',
+'mini', 'miniseries', 'oh my god', 'wtf', 'lol', 'awesome'}
 
 STOP_WORDS = nlp.Defaults.stop_words
 
@@ -44,7 +44,7 @@ def removeAwardStopWords(tweet):
     return " ".join(split_tweet)
 
 
-def contains_award_name(award_name, match, award_name_set, df):
+def contains_award_name(award_name, match, award_name_set, df=0):
     """
         contains_award_name: returns True if award name matches
     """
@@ -83,9 +83,8 @@ def is_person(token):
     return False
     
 
-
 def get_chunks(text):
-    filtered_text = text #removeAwardStopWords(text)
+    filtered_text = removeAwardStopWords(text)
     doc = nlp(filtered_text)
     chunks = []
     for chunk in doc.noun_chunks:
@@ -109,3 +108,7 @@ def buildVotedList(voting, threshold, ignore_first):
         voted.append(voting[i][0])
     return voted
 
+
+if __name__ == "__main__":
+    text = 'Wreck-It Ralph'
+    print(get_chunks(text))
