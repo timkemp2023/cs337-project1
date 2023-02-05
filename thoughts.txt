@@ -1,7 +1,0 @@
-parameterize award show name and year ?
-edit distance algorithm ?
-how to default to a hardcoded award ? where ? how ?
-what is gg_api.py ?
-
-words for winning award:
-won, win, got, received, secures, gains, rewarded, reward, obtained, obtains
