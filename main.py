@@ -70,13 +70,10 @@ def getNominees(tweets, awards_list):
     
 
 def getNominee(pattern, tweets, award_name):
-    print("AWARD: ", award_name)
     award_name_set = AWARD_NAMES_SET[award_name]
     voting = {}
 
     for tweet in tweets:
-        #matches = pattern.match(tweet)
-
         if 'comedy' in award_name or 'musical' in award_name:
             df = 1
         else:
@@ -110,6 +107,7 @@ def getPresenters(tweets, awards_list):
 
     for award in awards_list:
         awardToPresenters[award] = getPresenter(tweets, pattern, award)
+    return awardToPresenters
 
 
 def getPresenter(tweets, pattern, award_name):
@@ -222,6 +220,30 @@ def getHosts(tweets):
     voted_host = buildVotedList(sorted_voting, 2, False)
     return voted_host
 
+def create_readable_output(winners, nominees, presenters, hosts, awards):
+    outfile = open("readable.txt", "w")
+    
+    outfile.write("\tExtracted Awards: ")
+    for award in awards:
+        outfile.writelines([award, ", "])
+
+    outfile.write("\n\n")
+    
+    outfile.write("Hosts: ")
+    outfile.writelines([hosts[0], ", ", hosts[1], "\n"])
+
+    for official_award, _ in AWARD_NAMES_SET.items():
+        outfile.writelines(["\t\tAward: ", official_award])
+        for presenter in presenters[official_award]:
+            outfile.writelines(["\t\tPresenters: ", presenter])
+        for nominee in nominees[official_award]:
+            outfile.writelines(["\t\tNominees: ", nominee])
+        for winner in winners[official_award]:
+            outfile.writelines(["\t\tWinners: ", winner])
+        outfile.write("\n\n")
+
+    outfile.writelines("Additional Goals")
+
 
 def main():
     lower_case_tweets = getTweets("gg2013.json")
@@ -234,7 +256,8 @@ def main():
     awards = getAwardCategories(lower_case_tweets)
 
     create_readable_output(winners, nominees, presenters, hosts, awards)
-    create_json_output(winners, nominees, presenters, hosts, OFFICIAL_AWARDS)
+    output = create_output(winners, nominees, presenters, hosts, OFFICIAL_AWARDS)
+    create_json_output(output)
     
 
 if __name__ == "__main__":

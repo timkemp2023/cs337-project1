@@ -1,6 +1,7 @@
 import json
 import re
 import spacy
+import constants
 
 nlp = spacy.load("en_core_web_sm")
 
@@ -109,17 +110,19 @@ def buildVotedList(voting, threshold, ignore_first=False):
     return voted
 
 
-def create_readable_output(winners, nominees, presenters, hosts, awards):
-    pass
-
-def create_json_output(winners, nominees, presenters, hosts, awards):
+def create_output(winners, nominees, presenters, hosts, awards):
     output = {}
     output["hosts"] = hosts
     for award in awards:
         output[award] = {}
         output['winner'] = winners[award]
         output['nominees'] = nominees[award]
-        output['presenters'] = presenters[awards]
+        output['presenters'] = presenters[award]
 
-    json.dump("autograder_output.json")
+    return output
+
+def create_json_output(output):
+    with open("autograder.json", "w") as outfile:
+        json.dump(output, outfile)
+
 
