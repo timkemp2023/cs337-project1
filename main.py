@@ -4,7 +4,52 @@ import re
 import spacy
 
 
+def redCarpet(tweets):
+    patternDress = re.compile(r"(.*)(dress|dressed)(.*)?")
+    
+    votingWorst = {}
+    votingBest = {}
+    
+    for tweet in tweets:
+        matches = patternDress.match(tweet)
+        if matches:
+            patternWorst = re.compile(r"(.*)(worst|bad|ugly)(.*)")
+            matchesWorst = patternWorst.match(tweet)
+            if matchesWorst:
+                possible_people = get_people(matchesWorst.group(1)) + get_people(matchesWorst.group(3))
+                for person in possible_people:
+                    if ("Golden" and "Globe" not in person) and person in votingWorst:
+                        votingWorst[person] += 1
+                    else:
+                        votingWorst[person] = 1
 
+            patternBest = re.compile(r"(.*)(best|gorgeous|stunning|beautiful|amazing)(.*)")
+            matchesBest = patternBest.match(tweet)
+            if matchesBest:
+                possible_people = get_people(matchesBest.group(1)) + get_people(matchesBest.group(3))
+                for person in possible_people:
+                    if ("Golden" and "Globe" not in person) and person in votingBest:
+                        votingBest[person] += 1
+                    else:
+                        votingBest[person] = 1
+
+    #here
+    winners = []
+    if votingBest:
+        voted__best_winner = max(votingBest, key=votingBest.get)
+        winners.append(voted__best_winner)
+    else:
+        winners.append("N/A")
+
+    if votingWorst:
+        voted_worst_winner = max(votingWorst, key=votingWorst.get)
+        winners.append(voted_worst_winner)
+    else:
+        winners.append("N/A")
+
+            #  print (tweet)
+    print(winners)
+    return winners
 # compiles the winners of all awards
 def getWinners(tweets, awards_list):
     """
@@ -249,15 +294,19 @@ def main():
     lower_case_tweets = getTweets("gg2013.json")
     tweets = getTweets("gg2013.json", False)
 
-    winners = getWinners(tweets, OFFICIAL_AWARDS)
-    nominees = getNominees(tweets, OFFICIAL_AWARDS)
-    presenters = getPresenters(tweets, OFFICIAL_AWARDS)
-    hosts = getHosts(tweets)
-    awards = getAwardCategories(lower_case_tweets)
+    dressed = redCarpet(tweets)
+    bestDressed = dressed[0]
+    worstDressed = dressed[1]
 
-    create_readable_output(winners, nominees, presenters, hosts, awards)
-    output = create_output(winners, nominees, presenters, hosts, OFFICIAL_AWARDS)
-    create_json_output(output)
+    # winners = getWinners(tweets, OFFICIAL_AWARDS)
+    # nominees = getNominees(tweets, OFFICIAL_AWARDS)
+    # presenters = getPresenters(tweets, OFFICIAL_AWARDS)
+    # hosts = getHosts(tweets)
+    # awards = getAwardCategories(lower_case_tweets)
+
+    # create_readable_output(winners, nominees, presenters, hosts, awards)
+    # output = create_output(winners, nominees, presenters, hosts, OFFICIAL_AWARDS)
+    # create_json_output(output)
     
 
 if __name__ == "__main__":
