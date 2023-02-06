@@ -9,38 +9,82 @@ def redCarpet(tweets):
     
     votingWorst = {}
     votingBest = {}
+    votingMostTalked = {}
+    votingMostControversial = {}
     
     for tweet in tweets:
         matches = patternDress.match(tweet)
         if matches:
-            patternWorst = re.compile(r"(.*)(worst|bad|ugly)(.*)")
+            # print(tweet)
+            patternWorst = re.compile(r"(.*)(worst)(.*)")
+            patternWorst2 = re.compile(r"(.*)(is|was)(.*)(worst|ugly|hideous|dumb|ridiculous)(.*)")
             matchesWorst = patternWorst.match(tweet)
+            matchesWorst2 = patternWorst2.match(tweet)
             if matchesWorst:
-                possible_people = get_people(matchesWorst.group(1)) + get_people(matchesWorst.group(3))
+                possible_people = get_people(matchesWorst.group(3))
+                if matchesWorst2:
+                    possible_people += get_people(matchesWorst2.group(1))
                 for person in possible_people:
-                    if ("Golden" and "Globe" not in person) and person in votingWorst:
-                        votingWorst[person] += 1
-                    else:
-                        votingWorst[person] = 1
+                    if ("Golden" and "Globe" not in person):
+                        if person in votingWorst:
+                            votingWorst[person] += 1
+                            votingMostTalked[person] += 1
+                        else:
+                            votingWorst[person] = 1
+                            votingMostTalked[person] = 1
 
-            patternBest = re.compile(r"(.*)(best|gorgeous|stunning|beautiful|amazing)(.*)")
+            patternBest = re.compile(r"(.*)(best)(.*)")
+            patternBest2 = re.compile(r"(.*)(is|was)(.*)(best|beautiful|stunning|gorgeous|amazing)(.*)")
             matchesBest = patternBest.match(tweet)
+            matchesBest2 = patternBest2.match(tweet)
             if matchesBest:
-                possible_people = get_people(matchesBest.group(1)) + get_people(matchesBest.group(3))
+                possible_people = get_people(matchesBest.group(3))
+                if matchesBest2:
+                    possible_people += get_people(matchesBest2.group(1))
                 for person in possible_people:
-                    if ("Golden" and "Globe" not in person) and person in votingBest:
-                        votingBest[person] += 1
-                    else:
-                        votingBest[person] = 1
+                    if ("Golden" and "Globe" not in person):
+                        if person in votingWorst:
+                            if person in votingMostControversial:
+                                votingMostTalked[person] += 1
+                            else:
+                                votingMostControversial[person] = 1
+                        if person in votingBest:
+                            # print(person)
+                            votingBest[person] += 1
+                            votingMostTalked[person] += 1
+                        else:
+                            votingBest[person] = 1
+                            votingMostTalked[person] = 1
 
     #here
-    winners = {}
-    voted_best_winner = max(votingBest, key=votingBest.get)
-    winners["best dressed"] = voted_best_winner
+    winners = []
+    if votingBest:
+        voted_best_winner = max(votingBest, key=votingBest.get)
+        winners.append(str.title(voted_best_winner))
+    else:
+        winners.append("N/A")
 
-    voted_worst_winner = max(votingWorst, key=votingWorst.get)
-    winners['worst dressed'] = voted_worst_winner
+    if votingWorst:
+        voted_worst_winner = max(votingWorst, key=votingWorst.get)
+        winners.append(str.title(voted_worst_winner))
+    else:
+        winners.append("N/A")
 
+    if votingMostTalked:
+        voted_most_talked_winner = max(votingMostTalked, key=votingMostTalked.get)
+        winners.append(str.title(voted_most_talked_winner))
+    else:
+        winners.append("N/A")
+
+    if votingMostControversial:
+        voted_contro_winner = max(votingMostControversial, key=votingMostControversial.get)
+        winners.append(str.title(voted_contro_winner))
+    else:
+        winners.append("N/A")
+
+            #  print (tweet)
+
+    
     print(winners)
     return winners
 
@@ -293,6 +337,10 @@ def generateAnswers(year):
     tweets = getTweets(year, False)
 
     dressed = redCarpet(tweets)
+    bestDressed = dressed[0]
+    worstDressed = dressed[1]
+    mostTalked = dressed[2]
+    controversial = dressed[3]
 
     winners = getWinners(tweets, OFFICIAL_AWARDS)
     nominees = getNominees(tweets, OFFICIAL_AWARDS)
