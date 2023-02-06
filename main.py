@@ -82,6 +82,10 @@ def redCarpet(tweets):
     else:
         winners.append("N/A")
 
+            #  print (tweet)
+
+    
+    print(winners)
     return winners
 # compiles the winners of all awards
 def getWinners(tweets, awards_list):
@@ -332,8 +336,6 @@ def main():
     dressed = redCarpet(tweets)
     bestDressed = dressed[0]
     worstDressed = dressed[1]
-    mostTalkedAbout = dressed[2]
-    mostControversial = dressed[3]
 
     # winners = getWinners(tweets, OFFICIAL_AWARDS)
     # nominees = getNominees(tweets, OFFICIAL_AWARDS)
