@@ -15,7 +15,6 @@ def redCarpet(tweets):
     for tweet in tweets:
         matches = patternDress.match(tweet)
         if matches:
-            # print(tweet)
             patternWorst = re.compile(r"(.*)(worst)(.*)")
             patternWorst2 = re.compile(r"(.*)(is|was)(.*)(worst|ugly|hideous|dumb|ridiculous)(.*)")
             matchesWorst = patternWorst.match(tweet)
@@ -49,14 +48,11 @@ def redCarpet(tweets):
                             else:
                                 votingMostControversial[person] = 1
                         if person in votingBest:
-                            # print(person)
                             votingBest[person] += 1
                             votingMostTalked[person] += 1
                         else:
                             votingBest[person] = 1
                             votingMostTalked[person] = 1
-
-    #here
     winners = []
     if votingBest:
         voted_best_winner = max(votingBest, key=votingBest.get)
@@ -81,11 +77,6 @@ def redCarpet(tweets):
         winners.append(str.title(voted_contro_winner))
     else:
         winners.append("N/A")
-
-            #  print (tweet)
-
-    
-    print(winners)
     return winners
 
 
@@ -205,11 +196,6 @@ def getPresenter(tweets, pattern, award_name):
             if matches.group(3) and contains_award_name(award_name, matches.group(3).lower(), award_name_set):
                 possible_presenters = get_people(matches.group(1))
 
-                # if 'actor' in award_name or 'actress' in award_name or 'director' in award_name or 'cecil' in award_name:
-                #     typed_winners = [possible for possible in possible_winners if possible in ACTORS]
-                # else:
-                #     typed_winners = [possible for possible in possible_winners if possible in MOVIES]
-
                 for winner in possible_presenters:
                     if winner in voting:
                         voting[winner] += 1
@@ -305,7 +291,7 @@ def getHosts(tweets):
     return voted_host
 
 
-def create_readable_output(winners, nominees, presenters, hosts, awards):
+def create_readable_output(winners, nominees, presenters, hosts, awards, additional_goals):
     outfile = open("readable.txt", "w")
     
     outfile.write("\tExtracted Awards: ")
@@ -329,7 +315,10 @@ def create_readable_output(winners, nominees, presenters, hosts, awards):
         outfile.writelines(["\t\tWinners: ", winners[official_award], "\n"])
         outfile.write("\n\n")
 
-    outfile.writelines("\tAdditional Goals")
+    outfile.writelines("\tAdditional Goals\n")
+    for name, val in additional_goals.items():
+        outfile.writelines(["\t\t", name, ": ", val, "\n"])
+    
 
 
 def generateAnswers(year):
@@ -337,10 +326,12 @@ def generateAnswers(year):
     tweets = getTweets(year, False)
 
     dressed = redCarpet(tweets)
-    bestDressed = dressed[0]
-    worstDressed = dressed[1]
-    mostTalked = dressed[2]
-    controversial = dressed[3]
+    additional_goals = {
+        "Best dressed": dressed[0],
+        "Worst dressed" :dressed[1],
+        "Most talked about" :dressed[2],
+        "Most controversial" :dressed[3]
+    }
 
     winners = getWinners(tweets, OFFICIAL_AWARDS)
     nominees = getNominees(tweets, OFFICIAL_AWARDS)
@@ -348,7 +339,7 @@ def generateAnswers(year):
     hosts = getHosts(tweets)
     awards = getAwardCategories(lower_case_tweets)
 
-    create_readable_output(winners, nominees, presenters, hosts, awards)
+    create_readable_output(winners, nominees, presenters, hosts, awards, additional_goals)
     output = create_output(winners, nominees, presenters, hosts, OFFICIAL_AWARDS, awards)
     create_json_output(output, year)
     return winners, nominees, presenters
