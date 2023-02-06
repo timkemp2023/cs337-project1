@@ -277,10 +277,10 @@ def create_readable_output(winners, nominees, presenters, hosts, awards):
         outfile.writelines(["\t\tAward: ", official_award, "\n"])
         outfile.write("\t\tPresenters: ")
         for presenter in presenters[official_award]:
-            outfile.writelines([presenter, " "])
+            outfile.writelines([presenter, ", "])
         outfile.write("\n\t\tNominees: ",)
         for nominee in nominees[official_award]:
-            outfile.writelines([nominee, " "])
+            outfile.writelines([nominee, ", "])
         outfile.write("\n")
         outfile.writelines(["\t\tWinners: ", winners[official_award], "\n"])
         outfile.write("\n\n")
@@ -288,29 +288,23 @@ def create_readable_output(winners, nominees, presenters, hosts, awards):
     outfile.writelines("\tAdditional Goals")
 
 
-def main():
-    lower_case_tweets = getTweets("gg2013.json")
-    tweets = getTweets("gg2013.json", False)
-
-    # for tweet in tweets:
-    #     if "best dressed: " in tweet.lower() or 'worst dressed: ' in tweet.lower():
-    #         print(tweet)
-            
+def generateAnswers(year):
+    lower_case_tweets = getTweets(year)
+    tweets = getTweets(year, False)
 
     dressed = redCarpet(tweets)
-    # bestDressed = dressed[0]
-    # worstDressed = dressed[1]
 
-    # winners = getWinners(tweets, OFFICIAL_AWARDS)
-    # nominees = getNominees(tweets, OFFICIAL_AWARDS)
-    # presenters = getPresenters(tweets, OFFICIAL_AWARDS)
-    # hosts = getHosts(tweets)
-    # awards = getAwardCategories(lower_case_tweets)
+    winners = getWinners(tweets, OFFICIAL_AWARDS)
+    nominees = getNominees(tweets, OFFICIAL_AWARDS)
+    presenters = getPresenters(tweets, OFFICIAL_AWARDS)
+    hosts = getHosts(tweets)
+    awards = getAwardCategories(lower_case_tweets)
 
-    # create_readable_output(winners, nominees, presenters, hosts, awards)
-    # output = create_output(winners, nominees, presenters, hosts, OFFICIAL_AWARDS)
-    # create_json_output(output)
+    create_readable_output(winners, nominees, presenters, hosts, awards)
+    output = create_output(winners, nominees, presenters, hosts, OFFICIAL_AWARDS, awards)
+    create_json_output(output, year)
+    return winners, nominees, presenters
     
 
 if __name__ == "__main__":
-    main()
+    generateAnswers(2013)

@@ -34,7 +34,8 @@ def getTweetsTexts(tweets, lower_case=True):
     return texts
 
 
-def getTweets (file_name, lower_case=True):
+def getTweets (year, lower_case=True):
+    file_name = "gg" + str(year) + ".json"
     file = open(file_name)
     tweets = json.load(file)
     return getTweetsTexts(tweets, lower_case)
@@ -110,9 +111,10 @@ def buildVotedList(voting, threshold, ignore_first=False):
     return voted
 
 
-def create_output(winners, nominees, presenters, hosts, awards):
+def create_output(winners, nominees, presenters, hosts, awards, our_awards):
     output = {}
     output["hosts"] = hosts
+    output["our awards"] = our_awards
     for award in awards:
         output[award] = {}
         output[award]['winner'] = winners[award]
@@ -122,8 +124,6 @@ def create_output(winners, nominees, presenters, hosts, awards):
     return output
 
 
-def create_json_output(output):
-    with open("autograder.json", "w") as outfile:
+def create_json_output(output, year):
+    with open("autograder" + str(year) + ".json", "w") as outfile:
         json.dump(output, outfile)
-
-
