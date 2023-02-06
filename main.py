@@ -274,20 +274,22 @@ def create_readable_output(winners, nominees, presenters, hosts, awards):
 
     outfile.write("\n\n")
     
-    outfile.write("Hosts: ")
-    outfile.writelines([hosts[0], ", ", hosts[1], "\n"])
+    outfile.write("\t\tHosts: ")
+    outfile.writelines([hosts[0], ", ", hosts[1], "\n\n"])
 
     for official_award, _ in AWARD_NAMES_SET.items():
-        outfile.writelines(["\t\tAward: ", official_award])
+        outfile.writelines(["\t\tAward: ", official_award, "\n"])
+        outfile.write("\t\tPresenters: ")
         for presenter in presenters[official_award]:
-            outfile.writelines(["\t\tPresenters: ", presenter])
+            outfile.writelines([presenter, " "])
+        outfile.write("\n\t\tNominees: ",)
         for nominee in nominees[official_award]:
-            outfile.writelines(["\t\tNominees: ", nominee])
-        for winner in winners[official_award]:
-            outfile.writelines(["\t\tWinners: ", winner])
+            outfile.writelines([nominee, " "])
+        outfile.write("\n")
+        outfile.writelines(["\t\tWinners: ", winners[official_award], "\n"])
         outfile.write("\n\n")
 
-    outfile.writelines("Additional Goals")
+    outfile.writelines("\tAdditional Goals")
 
 
 def main():
