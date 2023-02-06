@@ -87,6 +87,8 @@ def redCarpet(tweets):
     
     print(winners)
     return winners
+
+
 # compiles the winners of all awards
 def getWinners(tweets, awards_list):
     """
@@ -302,6 +304,7 @@ def getHosts(tweets):
     voted_host = buildVotedList(sorted_voting, 2, False)
     return voted_host
 
+
 def create_readable_output(winners, nominees, presenters, hosts, awards):
     outfile = open("readable.txt", "w")
     
@@ -333,9 +336,16 @@ def main():
     lower_case_tweets = getTweets("gg2013.json")
     tweets = getTweets("gg2013.json", False)
 
+    # for tweet in tweets:
+    #     if "best dressed: " in tweet.lower() or 'worst dressed: ' in tweet.lower():
+    #         print(tweet)
+            
+
     dressed = redCarpet(tweets)
     bestDressed = dressed[0]
     worstDressed = dressed[1]
+    mostTalked = dressed[2]
+    controversial = dressed[3]
 
     # winners = getWinners(tweets, OFFICIAL_AWARDS)
     # nominees = getNominees(tweets, OFFICIAL_AWARDS)

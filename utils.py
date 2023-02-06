@@ -115,11 +115,12 @@ def create_output(winners, nominees, presenters, hosts, awards):
     output["hosts"] = hosts
     for award in awards:
         output[award] = {}
-        output['winner'] = winners[award]
-        output['nominees'] = nominees[award]
-        output['presenters'] = presenters[award]
+        output[award]['winner'] = winners[award]
+        output[award]['nominees'] = nominees[award]
+        output[award]['presenters'] = presenters[award]
 
     return output
+
 
 def create_json_output(output):
     with open("autograder.json", "w") as outfile:
