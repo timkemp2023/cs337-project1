@@ -34,22 +34,17 @@ def redCarpet(tweets):
                         votingBest[person] = 1
 
     #here
-    winners = []
-    if votingBest:
-        voted__best_winner = max(votingBest, key=votingBest.get)
-        winners.append(voted__best_winner)
-    else:
-        winners.append("N/A")
+    winners = {}
+    voted_best_winner = max(votingBest, key=votingBest.get)
+    winners["best dressed"] = voted_best_winner
 
-    if votingWorst:
-        voted_worst_winner = max(votingWorst, key=votingWorst.get)
-        winners.append(voted_worst_winner)
-    else:
-        winners.append("N/A")
+    voted_worst_winner = max(votingWorst, key=votingWorst.get)
+    winners['worst dressed'] = voted_worst_winner
 
-            #  print (tweet)
     print(winners)
     return winners
+
+
 # compiles the winners of all awards
 def getWinners(tweets, awards_list):
     """
@@ -265,6 +260,7 @@ def getHosts(tweets):
     voted_host = buildVotedList(sorted_voting, 2, False)
     return voted_host
 
+
 def create_readable_output(winners, nominees, presenters, hosts, awards):
     outfile = open("readable.txt", "w")
     
@@ -294,9 +290,14 @@ def main():
     lower_case_tweets = getTweets("gg2013.json")
     tweets = getTweets("gg2013.json", False)
 
+    # for tweet in tweets:
+    #     if "best dressed: " in tweet.lower() or 'worst dressed: ' in tweet.lower():
+    #         print(tweet)
+            
+
     dressed = redCarpet(tweets)
-    bestDressed = dressed[0]
-    worstDressed = dressed[1]
+    # bestDressed = dressed[0]
+    # worstDressed = dressed[1]
 
     # winners = getWinners(tweets, OFFICIAL_AWARDS)
     # nominees = getNominees(tweets, OFFICIAL_AWARDS)
